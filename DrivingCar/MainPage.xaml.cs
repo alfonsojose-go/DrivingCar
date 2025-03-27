@@ -1,70 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.ServiceModel.Channels;
 using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.System;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
-
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
+using Windows.UI.Xaml.Shapes;
 
 namespace DrivingCar
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class MainPage : Page
     {
+        // Car movement properties
+        private const double CarMoveDistance = 10; // Pixels to move per click
+        private const double LeftBoundary = 50;    // Left boundary (match your road position)
+        private const double RightBoundary = 300;  // Right boundary (road width - car width)
+       
+
         public MainPage()
         {
             this.InitializeComponent();
-
-            // Add key down event handler
-            this.KeyDown += MainPage_KeyDown;
-
-            // Ensure the page can receive keyboard focus
-            this.Loaded += (s, e) => this.Focus(FocusState.Programmatic);
         }
 
-        private void MainPage_KeyDown(object sender, KeyRoutedEventArgs e)
+
+        private void btnLeft_Click(object sender, RoutedEventArgs e)
         {
-            // Check what the key is pressed
-            switch (e.Key)
-            {
-                case VirtualKey.Enter:
-                    btnStart_Click(btnStart, null);
-                    e.Handled = true;
-                    break;
-
-                case VirtualKey.Escape:
-                    btnExit_Click(btnExit, null);
-                    e.Handled = true;
-                    break;
-
-                case VirtualKey.Left:
-                    btnLeft_Click(btnLeft, null);
-                    e.Handled = true;
-                    break;
-
-                case VirtualKey.Right:
-                    btnRight_Click(btnRight, null);
-                    e.Handled = true;
-                    break;
-            }
+            MoveCar(-CarMoveDistance); // Move left
         }
 
+        private void btnRight_Click(object sender, RoutedEventArgs e)
+        {
+            MoveCar(CarMoveDistance); // Move right
+        }
+
+        private void MoveCar(double distance)
+        {
+            // Get current position
+            double currentLeft = Canvas.GetLeft(PlayerCar);
+
+            // Calculate new position
+            double newLeft = currentLeft + distance;
+
+            // Check boundaries (so car doesn't go off-road)
+            if (newLeft < LeftBoundary)
+                newLeft = LeftBoundary;
+            else if (newLeft > RightBoundary)
+                newLeft = RightBoundary;
+
+            // Set new position
+            Canvas.SetLeft(PlayerCar, newLeft);
+        }
+
+        
         private void btnStart_Click(object sender, RoutedEventArgs e)
         {
-            btnStart.Content = "Playing...";
+            btnStart.Content = "Playing..";
         }
 
         private void btnExit_Click(object sender, RoutedEventArgs e)
@@ -72,31 +64,26 @@ namespace DrivingCar
             Application.Current.Exit();
         }
 
-        private async void btnRight_Click(object sender, RoutedEventArgs e)
+
+        private void Page_KeyDown(object sender, KeyRoutedEventArgs e)
         {
+            //if (!_gameRunning) return;
 
-            //test code. Put code here to move the car to the right
-            var dialog = new ContentDialog
+            switch (e.Key)
             {
-                Title = "Movement",
-                Content = "Right button clicked",
-                CloseButtonText = "OK"
-            };
-
-            await dialog.ShowAsync();
-        }
-
-        private async void btnLeft_Click(object sender, RoutedEventArgs e)
-        {
-            //test code. Put code here to move the car to the left
-            var dialog = new ContentDialog
-            {
-                Title = "Movement",
-                Content = "Left button clicked",
-                CloseButtonText = "OK"
-            };
-
-            await dialog.ShowAsync();
+                case VirtualKey.Left:
+                    btnLeft_Click(null, null);
+                    break;
+                case VirtualKey.Right:
+                    btnRight_Click(null, null);
+                    break;
+                case VirtualKey.Up:
+                case VirtualKey.Down:
+                    
+                    
+                    break;
+            }
+            e.Handled = true;
         }
     }
 }
