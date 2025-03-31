@@ -12,6 +12,9 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Media.Animation;
+<<<<<<< HEAD
+>>>>>>> b7956fb8139f16fc76873f62d62199441963c210
+=======
 >>>>>>> b7956fb8139f16fc76873f62d62199441963c210
 
 namespace DrivingCar
@@ -40,8 +43,13 @@ namespace DrivingCar
         {
             this.InitializeComponent();
 <<<<<<< HEAD
+<<<<<<< HEAD
             LoadScores();
 =======
+=======
+
+        }
+>>>>>>> b7956fb8139f16fc76873f62d62199441963c210
 
 >>>>>>> b7956fb8139f16fc76873f62d62199441963c210
         }
