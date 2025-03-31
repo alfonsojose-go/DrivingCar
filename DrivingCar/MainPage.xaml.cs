@@ -7,21 +7,14 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
-<<<<<<< HEAD
-=======
 using Windows.UI.Xaml.Shapes;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Media.Animation;
-<<<<<<< HEAD
->>>>>>> b7956fb8139f16fc76873f62d62199441963c210
-=======
->>>>>>> b7956fb8139f16fc76873f62d62199441963c210
 
 namespace DrivingCar
 {
     public sealed partial class MainPage : Page
     {
-<<<<<<< HEAD
         private int currentScore;
         private List<int> scores = new List<int>();
 
@@ -30,28 +23,12 @@ namespace DrivingCar
         private const double RightBoundary = 300;
         private const double CarStartLeft = 170;  // Original car position
         private const double CarStartTop = 324;
-=======
-        // Car movement properties
-        private const double CarMoveDistance = 10; // Pixels to move per click
-        private const double LeftBoundary = 50;    // Left boundary (match your road position)
-        private const double RightBoundary = 300;  // Right boundary (road width - car width)
-        bool gameRunning;
-       
->>>>>>> b7956fb8139f16fc76873f62d62199441963c210
+        private bool gameRunning;
 
         public MainPage()
         {
             this.InitializeComponent();
-<<<<<<< HEAD
-<<<<<<< HEAD
             LoadScores();
-=======
-=======
-
-        }
->>>>>>> b7956fb8139f16fc76873f62d62199441963c210
-
->>>>>>> b7956fb8139f16fc76873f62d62199441963c210
         }
 
         private void btnLeft_Click(object sender, RoutedEventArgs e)
