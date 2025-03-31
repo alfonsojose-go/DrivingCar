@@ -24,6 +24,7 @@ namespace DrivingCar
         public MainPage()
         {
             this.InitializeComponent();
+
         }
 
         private void btnLeft_Click(object sender, RoutedEventArgs e)
@@ -61,17 +62,6 @@ namespace DrivingCar
             PlayerCar.RenderTransform = rotateTransform;
         }
 
-        private void EndGame()
-        {
-            btnStart.Content = "Start";
-            lblCrashScore.Text = $"Score: {currentScore}";
-            lblCrashScore.Visibility = Visibility.Visible;
-
-            // Save and update score history
-            scores.Add(currentScore);
-            scores = scores.OrderByDescending(s => s).Take(5).ToList();  // Keep only top 5 scores
-            SaveScores();
-            UpdateScoreDisplay();
 
             // Reset game state
             currentScore = 0;
@@ -100,6 +90,20 @@ namespace DrivingCar
             string scoreData = string.Join(",", scores);
             localSettings.Values["ScoreHistory"] = scoreData;
         }
+
+        private void LoadScores()
+        {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            if (localSettings.Values.ContainsKey("ScoreHistory"))
+            {
+                string scoreData = (string)localSettings.Values["ScoreHistory"];
+                scores = scoreData.Split(',').Where(s => !string.IsNullOrWhiteSpace(s))
+                                    .Select(int.Parse).OrderByDescending(s => s)
+                                    .Take(5).ToList();  // Keep only top 5 scores
+                UpdateScoreDisplay();
+            }
+        }
+
 
         private void LoadScores()
         {
@@ -150,5 +154,59 @@ namespace DrivingCar
 
             // ALFONSO ADD YOUR CODE HERE
         }
+<<<<<<< HEAD
+
+
+        public void AddMovingImage(string imagePath, double width, double height)
+        {
+            // Create Image
+            Image img = new Image
+            {
+                Width = width,
+                Height = height
+            };
+
+            // Load Image Source
+            string fullPath = $"ms-appx:///{imagePath.TrimStart('/')}";
+            BitmapImage bitmap = new BitmapImage(new Uri(fullPath, UriKind.Absolute));
+            img.Source = bitmap;
+
+            // Set initial position
+            Canvas.SetLeft(img, 200); // Center horizontally
+            Canvas.SetTop(img, 0);    // Start at the top
+
+            // Add to Canvas
+            GameCanvas.Children.Add(img);
+
+            // Ensure Canvas Height is Available
+            double targetHeight = GameCanvas.ActualHeight > 0 ? GameCanvas.ActualHeight : 500;
+
+            // Create Animation
+            DoubleAnimation animation = new DoubleAnimation
+            {
+                From = 0,
+                To = targetHeight - height,
+                Duration = new Duration(TimeSpan.FromSeconds(3)),
+                AutoReverse = false,
+                RepeatBehavior = new RepeatBehavior(1)
+            };
+
+            // Apply Animation to Canvas.Top Property
+            Storyboard storyboard = new Storyboard();
+            Storyboard.SetTarget(animation, img);
+            Storyboard.SetTargetProperty(animation, "(Canvas.Top)");
+            storyboard.Children.Add(animation);
+
+            // Start Animation on UI Thread
+            Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                storyboard.Begin();
+            });
+        }
+
+        
+    };
+
+=======
     }
 }
