@@ -8,6 +8,8 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
+using Windows.UI.Xaml.Media.Imaging;
+using Windows.UI.Xaml.Media.Animation;
 
 namespace DrivingCar
 {
@@ -17,11 +19,13 @@ namespace DrivingCar
         private const double CarMoveDistance = 10; // Pixels to move per click
         private const double LeftBoundary = 50;    // Left boundary (match your road position)
         private const double RightBoundary = 300;  // Right boundary (road width - car width)
+        bool gameRunning;
        
 
         public MainPage()
         {
             this.InitializeComponent();
+
         }
 
 
