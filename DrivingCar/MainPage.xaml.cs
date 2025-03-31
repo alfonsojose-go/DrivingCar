@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Windows.Foundation;
+using System.Linq;
+using Windows.Storage;
 using Windows.System;
-using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -19,64 +19,82 @@ namespace DrivingCar
         private const double CarMoveDistance = 10; // Pixels to move per click
         private const double LeftBoundary = 50;    // Left boundary (match your road position)
         private const double RightBoundary = 300;  // Right boundary (road width - car width)
-        bool gameRunning;
        
 
         public MainPage()
         {
             this.InitializeComponent();
+<<<<<<< HEAD
             // Usage Example (Ensure Canvas is Loaded)
             GameCanvas.Loaded += (s, e) => {
                 AddMovingImage("Assets/carObstacle1.png", 150, 50);
 
             };
+=======
+>>>>>>> 434e8c425de772f22c667e78dd9b5e889cea29a3
         }
-
 
         private void btnLeft_Click(object sender, RoutedEventArgs e)
         {
-            tiltCar(-15); // Tilt left
-            MoveCar(-CarMoveDistance); // Move left
-            
+            tiltCar(-15);
+            MoveCar(-CarMoveDistance);
         }
 
         private void btnRight_Click(object sender, RoutedEventArgs e)
         {
-            tiltCar(15); // Tilt right
-            MoveCar(CarMoveDistance); // Move right
-            
+            tiltCar(15);
+            MoveCar(CarMoveDistance);
         }
 
         private void MoveCar(double distance)
         {
-            // Get current position
             double currentLeft = Canvas.GetLeft(PlayerCar);
-
-            // Calculate new position
             double newLeft = currentLeft + distance;
 
-            // Check boundaries (so car doesn't go off-road)
-            if (newLeft < LeftBoundary)
-                newLeft = LeftBoundary;
-            else if (newLeft > RightBoundary)
-                newLeft = RightBoundary;
+            if (newLeft < LeftBoundary || newLeft > RightBoundary)
+            {
+                EndGame();
+                return;
+            }
 
-            // Set new position
             Canvas.SetLeft(PlayerCar, newLeft);
+            currentScore++;
+            lblScore.Text = currentScore.ToString();
         }
 
         private void tiltCar(double angle)
         {
-            // Rotate the car
             RotateTransform rotateTransform = new RotateTransform();
             rotateTransform.Angle = angle;
             PlayerCar.RenderTransform = rotateTransform;
         }
 
+        private void EndGame()
+        {
+            btnStart.Content = "Start";
+            lblCrashScore.Text = $"Score: {currentScore}";
+            lblCrashScore.Visibility = Visibility.Visible;
+
+            // Save and update score history
+            scores.Add(currentScore);
+            scores = scores.OrderByDescending(s => s).Take(5).ToList();  // Keep only top 5 scores
+            SaveScores();
+            UpdateScoreDisplay();
+
+            // Reset game state
+            currentScore = 0;
+            lblScore.Text = "0";
+
+            // Move car back to original position
+            Canvas.SetLeft(PlayerCar, CarStartLeft);
+            Canvas.SetTop(PlayerCar, CarStartTop);
+            tiltCar(0);
+        }
 
         private void btnStart_Click(object sender, RoutedEventArgs e)
         {
             btnStart.Content = "Playing..";
+            lblCrashScore.Visibility = Visibility.Collapsed;
         }
 
         private void btnExit_Click(object sender, RoutedEventArgs e)
@@ -84,11 +102,38 @@ namespace DrivingCar
             Application.Current.Exit();
         }
 
+        private void SaveScores()
+        {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            string scoreData = string.Join(",", scores);
+            localSettings.Values["ScoreHistory"] = scoreData;
+        }
+
+        private void LoadScores()
+        {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            if (localSettings.Values.ContainsKey("ScoreHistory"))
+            {
+                string scoreData = (string)localSettings.Values["ScoreHistory"];
+                scores = scoreData.Split(',').Where(s => !string.IsNullOrWhiteSpace(s))
+                                    .Select(int.Parse).OrderByDescending(s => s)
+                                    .Take(5).ToList();  // Keep only top 5 scores
+                UpdateScoreDisplay();
+            }
+        }
+
+        private void UpdateScoreDisplay()
+        {
+            lstScores.Items.Clear();
+            foreach (int score in scores)
+            {
+                lstScores.Items.Add($"Score: {score}");
+            }
+            lstScores.Visibility = scores.Any() ? Visibility.Visible : Visibility.Collapsed;
+        }
 
         private void Page_KeyDown(object sender, KeyRoutedEventArgs e)
         {
-            //if (!_gameRunning) return;
-
             switch (e.Key)
             {
                 case VirtualKey.Left:
@@ -101,15 +146,16 @@ namespace DrivingCar
                 case VirtualKey.Down:
                     tiltCar(0);
                     break;
-                case VirtualKey.Enter:  // Handle Enter key press
+                case VirtualKey.Enter:
                     btnStart_Click(null, null);
                     break;
-                case VirtualKey.Escape:  // Handle ESC key press
+                case VirtualKey.Escape:
                     btnExit_Click(null, null);
                     break;
             }
             e.Handled = true;
         }
+<<<<<<< HEAD
 
 
         public void AddMovingImage(string imagePath, double width, double height)
@@ -162,4 +208,7 @@ namespace DrivingCar
         
     };
 
+=======
+    }
+>>>>>>> 434e8c425de772f22c667e78dd9b5e889cea29a3
 }

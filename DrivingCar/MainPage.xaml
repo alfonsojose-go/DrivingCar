@@ -1,18 +1,19 @@
-﻿<Page
-    x:Class="DrivingCar.MainPage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:DrivingCar"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" 
-    Height="586" Width="476"
-    KeyDown="Page_KeyDown">
+﻿<Page x:Class="DrivingCar.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="using:DrivingCar"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+      Height="810" Width="476"
+      KeyDown="Page_KeyDown">
 
-    <Grid>
+    <Grid Height="789" VerticalAlignment="Center">
         <!-- Game Canvas -->
-        <Canvas x:Name="GameCanvas" HorizontalAlignment="Left" Height="400" Margin="34,81,0,0" VerticalAlignment="Top" Width="400">
+        <Canvas x:Name="GameCanvas" HorizontalAlignment="Left" Height="400" 
+                Margin="34,81,0,0" VerticalAlignment="Top" Width="400">
+
             <!-- Road Background -->
             <Rectangle x:Name="Road" Width="300" Height="400" Fill="DimGray" Canvas.Left="50"/>
 
@@ -20,42 +21,53 @@
             <Rectangle x:Name="LeftBorder" Width="20" Height="400" Fill="DarkGreen" Canvas.Left="30"/>
             <Rectangle x:Name="RightBorder" Width="20" Height="400" Fill="DarkGreen" Canvas.Left="350"/>
 
+            <!-- Player Car -->
             <Image x:Name="PlayerCar"
-                   Source="/Assets/highwayCar.png" 
-                   Width="56" 
+                   Source="ms-appx:///Assets/highwayCar.png"
+                   Width="56"
                    Height="74"
-                   Stretch="Uniform" 
-                   Canvas.Left="170" 
-                   Canvas.Top="324" RenderTransformOrigin="0.5,0.5">
+                   Stretch="Uniform"
+                   Canvas.Left="170"
+                   Canvas.Top="324"
+                   RenderTransformOrigin="0.5,0.5">
                 <Image.RenderTransform>
-                    <CompositeTransform Rotation="0"/>
+                    <CompositeTransform x:Name="CarTransform" Rotation="0"/>
                 </Image.RenderTransform>
             </Image>
-
-
         </Canvas>
 
-        <!-- Your Original UI Elements (All Buttons Preserved) -->
-        <TextBlock x:Name="lblTitle" HorizontalAlignment="Left" Margin="34,23,0,0" 
-                   TextWrapping="Wrap" Text="Highway Driver" VerticalAlignment="Top" 
+        <!-- Game Title -->
+        <TextBlock x:Name="lblTitle" HorizontalAlignment="Left" Margin="34,23,0,0"
+                   TextWrapping="Wrap" Text="Highway Driver" VerticalAlignment="Top"
                    FontSize="48" FontFamily="Arial Black"/>
 
-        <Button x:Name="btnStart" Content="Start" Margin="286,505,0,0" 
-                VerticalAlignment="Top" Click="btnStart_Click"/>
-
-        <TextBlock HorizontalAlignment="Left" Margin="42,507,0,0" 
+        <!-- Score -->
+        <TextBlock HorizontalAlignment="Left" Margin="42,507,0,0"
                    TextWrapping="Wrap" Text="Score:" VerticalAlignment="Top"/>
-
-        <TextBlock x:Name="lblScore" HorizontalAlignment="Left" Margin="106,507,0,0" 
+        <TextBlock x:Name="lblScore" HorizontalAlignment="Left" Margin="106,507,0,0"
                    TextWrapping="Wrap" Text="0" VerticalAlignment="Top"/>
 
-        <Button x:Name="btnExit" Content="Exit" Margin="388,505,0,0" 
-                VerticalAlignment="Top" Click="btnExit_Click"/>
+        <!-- Buttons -->
+        <Button x:Name="btnStart" Content="Start" Margin="286,505,0,0"
+        VerticalAlignment="Top" Click="btnStart_Click"/>
+        <Button x:Name="btnExit" Content="Exit" Margin="388,505,0,0"
+        VerticalAlignment="Top" Click="btnExit_Click"/>
 
-        <Button x:Name="btnRight" Content="&gt;" Margin="225,505,0,0" 
-                VerticalAlignment="Top" Click="btnRight_Click"/>
+        <!-- Arrange Left and Right buttons logically -->
+        <Button x:Name="btnLeft" Content="←" Margin="160,505,0,0"
+        VerticalAlignment="Top" Click="btnLeft_Click"/>
+        <Button x:Name="btnRight" Content="→" Margin="210,505,0,0"
+        VerticalAlignment="Top" Click="btnRight_Click"/>
 
-        <Button x:Name="btnLeft" Content="&lt;" Margin="185,505,0,0" 
-                VerticalAlignment="Top" Click="btnLeft_Click"/>
+
+        <!-- Crash Score Display -->
+        <TextBlock x:Name="lblCrashScore" HorizontalAlignment="Left" VerticalAlignment="Top"
+                   TextWrapping="Wrap" Text="Score: 0" FontSize="38" FontFamily="Arial Black" Margin="110,150,0,0"/>
+
+        <ListBox x:Name="lstScores" HorizontalAlignment="Left" Margin="34,550,0,0"
+         VerticalAlignment="Top" Width="200" Height="195"/>
+
+
+
     </Grid>
 </Page>
