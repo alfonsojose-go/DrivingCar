@@ -15,20 +15,15 @@ namespace DrivingCar
 {
     public sealed partial class MainPage : Page
     {
-        private int currentScore;
-        private List<int> scores = new List<int>();
-
-        private const double CarMoveDistance = 10;
-        private const double LeftBoundary = 50;
-        private const double RightBoundary = 300;
-        private const double CarStartLeft = 170;  // Original car position
-        private const double CarStartTop = 324;
-        private bool gameRunning;
+        // Car movement properties
+        private const double CarMoveDistance = 10; // Pixels to move per click
+        private const double LeftBoundary = 50;    // Left boundary (match your road position)
+        private const double RightBoundary = 300;  // Right boundary (road width - car width)
+       
 
         public MainPage()
         {
             this.InitializeComponent();
-            LoadScores();
         }
 
         private void btnLeft_Click(object sender, RoutedEventArgs e)
