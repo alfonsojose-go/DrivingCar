@@ -25,10 +25,13 @@
                    Width="56" 
                    Height="74"
                    Stretch="Uniform" 
-                   Canvas.Left="185" 
-                   Canvas.Top="329">
+                   Canvas.Left="170" 
+                   Canvas.Top="324" RenderTransformOrigin="0.5,0.5">
+                <Image.RenderTransform>
+                    <CompositeTransform Rotation="0"/>
+                </Image.RenderTransform>
             </Image>
-                              
+
 
         </Canvas>
 

@@ -27,12 +27,16 @@ namespace DrivingCar
 
         private void btnLeft_Click(object sender, RoutedEventArgs e)
         {
+            tiltCar(-15); // Tilt left
             MoveCar(-CarMoveDistance); // Move left
+            
         }
 
         private void btnRight_Click(object sender, RoutedEventArgs e)
         {
+            tiltCar(15); // Tilt right
             MoveCar(CarMoveDistance); // Move right
+            
         }
 
         private void MoveCar(double distance)
@@ -53,7 +57,15 @@ namespace DrivingCar
             Canvas.SetLeft(PlayerCar, newLeft);
         }
 
-        
+        private void tiltCar(double angle)
+        {
+            // Rotate the car
+            RotateTransform rotateTransform = new RotateTransform();
+            rotateTransform.Angle = angle;
+            PlayerCar.RenderTransform = rotateTransform;
+        }
+
+
         private void btnStart_Click(object sender, RoutedEventArgs e)
         {
             btnStart.Content = "Playing..";
@@ -79,8 +91,13 @@ namespace DrivingCar
                     break;
                 case VirtualKey.Up:
                 case VirtualKey.Down:
-                    
-                    
+                    tiltCar(0);
+                    break;
+                case VirtualKey.Enter:  // Handle Enter key press
+                    btnStart_Click(null, null);
+                    break;
+                case VirtualKey.Escape:  // Handle ESC key press
+                    btnExit_Click(null, null);
                     break;
             }
             e.Handled = true;
