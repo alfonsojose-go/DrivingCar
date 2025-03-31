@@ -25,7 +25,11 @@ namespace DrivingCar
         public MainPage()
         {
             this.InitializeComponent();
+            // Usage Example (Ensure Canvas is Loaded)
+            GameCanvas.Loaded += (s, e) => {
+                AddMovingImage("Assets/carObstacle1.png", 150, 50);
 
+            };
         }
 
 
@@ -106,5 +110,56 @@ namespace DrivingCar
             }
             e.Handled = true;
         }
-    }
+
+
+        public void AddMovingImage(string imagePath, double width, double height)
+        {
+            // Create Image
+            Image img = new Image
+            {
+                Width = width,
+                Height = height
+            };
+
+            // Load Image Source
+            string fullPath = $"ms-appx:///{imagePath.TrimStart('/')}";
+            BitmapImage bitmap = new BitmapImage(new Uri(fullPath, UriKind.Absolute));
+            img.Source = bitmap;
+
+            // Set initial position
+            Canvas.SetLeft(img, 200); // Center horizontally
+            Canvas.SetTop(img, 0);    // Start at the top
+
+            // Add to Canvas
+            GameCanvas.Children.Add(img);
+
+            // Ensure Canvas Height is Available
+            double targetHeight = GameCanvas.ActualHeight > 0 ? GameCanvas.ActualHeight : 500;
+
+            // Create Animation
+            DoubleAnimation animation = new DoubleAnimation
+            {
+                From = 0,
+                To = targetHeight - height,
+                Duration = new Duration(TimeSpan.FromSeconds(3)),
+                AutoReverse = false,
+                RepeatBehavior = new RepeatBehavior(1)
+            };
+
+            // Apply Animation to Canvas.Top Property
+            Storyboard storyboard = new Storyboard();
+            Storyboard.SetTarget(animation, img);
+            Storyboard.SetTargetProperty(animation, "(Canvas.Top)");
+            storyboard.Children.Add(animation);
+
+            // Start Animation on UI Thread
+            Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                storyboard.Begin();
+            });
+        }
+
+        
+    };
+
 }
