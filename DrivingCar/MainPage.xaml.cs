@@ -150,11 +150,7 @@ namespace DrivingCar
                     break;
             }
             e.Handled = true;
-
-
-            // ALFONSO ADD YOUR CODE HERE
         }
-<<<<<<< HEAD
 
 
         public void AddMovingImage(string imagePath, double width, double height)
@@ -204,9 +200,6 @@ namespace DrivingCar
             });
         }
 
-        
-    };
 
-=======
     }
 }
