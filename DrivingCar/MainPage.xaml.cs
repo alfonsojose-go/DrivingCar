@@ -15,16 +15,20 @@ namespace DrivingCar
 {
     public sealed partial class MainPage : Page
     {
-        // Car movement properties
-        private const double CarMoveDistance = 10; // Pixels to move per click
-        private const double LeftBoundary = 50;    // Left boundary (match your road position)
-        private const double RightBoundary = 300;  // Right boundary (road width - car width)
-       
+        private int currentScore;
+        private List<int> scores = new List<int>();
+
+        private const double CarMoveDistance = 10;
+        private const double LeftBoundary = 50;
+        private const double RightBoundary = 300;
+        private const double CarStartLeft = 170;  // Original car position
+        private const double CarStartTop = 324;
+        private bool gameRunning;
 
         public MainPage()
         {
             this.InitializeComponent();
-
+            LoadScores();
         }
 
         private void btnLeft_Click(object sender, RoutedEventArgs e)
@@ -62,6 +66,17 @@ namespace DrivingCar
             PlayerCar.RenderTransform = rotateTransform;
         }
 
+        private void EndGame()
+        {
+            btnStart.Content = "Start";
+            lblCrashScore.Text = $"Score: {currentScore}";
+            lblCrashScore.Visibility = Visibility.Visible;
+
+            // Save and update score history
+            scores.Add(currentScore);
+            scores = scores.OrderByDescending(s => s).Take(5).ToList();  // Keep only top 5 scores
+            SaveScores();
+            UpdateScoreDisplay();
 
             // Reset game state
             currentScore = 0;
@@ -90,20 +105,6 @@ namespace DrivingCar
             string scoreData = string.Join(",", scores);
             localSettings.Values["ScoreHistory"] = scoreData;
         }
-
-        private void LoadScores()
-        {
-            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            if (localSettings.Values.ContainsKey("ScoreHistory"))
-            {
-                string scoreData = (string)localSettings.Values["ScoreHistory"];
-                scores = scoreData.Split(',').Where(s => !string.IsNullOrWhiteSpace(s))
-                                    .Select(int.Parse).OrderByDescending(s => s)
-                                    .Take(5).ToList();  // Keep only top 5 scores
-                UpdateScoreDisplay();
-            }
-        }
-
 
         private void LoadScores()
         {
@@ -150,7 +151,11 @@ namespace DrivingCar
                     break;
             }
             e.Handled = true;
+
+
+            // ALFONSO ADD YOUR CODE HERE
         }
+<<<<<<< HEAD
 
 
         public void AddMovingImage(string imagePath, double width, double height)
@@ -200,6 +205,9 @@ namespace DrivingCar
             });
         }
 
+        
+    };
 
+=======
     }
 }
