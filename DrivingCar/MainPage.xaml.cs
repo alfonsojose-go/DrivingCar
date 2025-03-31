@@ -25,10 +25,25 @@ namespace DrivingCar
         private const double CarStartTop = 324;
         private bool gameRunning;
 
+        private const double carWidth = 56;
+        private const double carHeigth = 74;
+
         public MainPage()
         {
             this.InitializeComponent();
             LoadScores();
+
+            // Ensure the GameCanvas is properly loaded
+            if (GameCanvas != null)
+            {
+                GameCanvas.Loaded += GameCanvas_Loaded;
+            }
+        }
+
+        // Separate method for handling the Loaded event
+        private void GameCanvas_Loaded(object sender, RoutedEventArgs e)
+        {
+            AddMovingImage("Assets/highwayCar.png");
         }
 
         private void btnLeft_Click(object sender, RoutedEventArgs e)
@@ -92,6 +107,8 @@ namespace DrivingCar
         {
             btnStart.Content = "Playing..";
             lblCrashScore.Visibility = Visibility.Collapsed;
+
+
         }
 
         private void btnExit_Click(object sender, RoutedEventArgs e)
@@ -153,18 +170,19 @@ namespace DrivingCar
             e.Handled = true;
 
 
-            // ALFONSO ADD YOUR CODE HERE
+      
         }
-<<<<<<< HEAD
 
 
-        public void AddMovingImage(string imagePath, double width, double height)
+
+        public void AddMovingImage(string imagePath)
         {
             // Create Image
             Image img = new Image
             {
-                Width = width,
-                Height = height
+                Width = carWidth,
+                Height = carHeigth,
+
             };
 
             // Load Image Source
@@ -186,7 +204,7 @@ namespace DrivingCar
             DoubleAnimation animation = new DoubleAnimation
             {
                 From = 0,
-                To = targetHeight - height,
+                To = targetHeight - carHeigth,
                 Duration = new Duration(TimeSpan.FromSeconds(3)),
                 AutoReverse = false,
                 RepeatBehavior = new RepeatBehavior(1)
@@ -205,9 +223,8 @@ namespace DrivingCar
             });
         }
 
-        
-    };
+    
 
-=======
+
     }
 }
