@@ -73,7 +73,7 @@ namespace DrivingCar
                 return;
 
             double targetHeight = _gameCanvas.ActualHeight > 0 ? _gameCanvas.ActualHeight : 500;
-            double beyondCanvas = targetHeight + CarHeight; // Move beyond canvas
+            double beyondCanvas = targetHeight + CarHeight + 500; // Move beyond canvas
 
             // Create Animation
             DoubleAnimation animation = new DoubleAnimation

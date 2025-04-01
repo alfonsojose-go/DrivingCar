@@ -53,32 +53,70 @@ namespace DrivingCar
 
         private void SpawnObstacles()
         {
-                int obstacleType = random.Next(1, 5); // Random number between 1 and 4
-                Car obstacle = null;
+            int obstacleType = random.Next(1, 5); // Random number between 1 and 4
+            Car obstacle = null;
 
-                switch (obstacleType)
-                {
-                    case 1:
-                        obstacle = new Car("Assets/carObstacle1.png", random.Next(45, 300), 0);
-                        break;
-                    case 2:
-                        obstacle = new PoliceCar("Assets/carPolice.png", random.Next(45, 300), 0);
-                        break;
-                    case 3:
-                        obstacle = new SpeedCar("Assets/speedCar.png", random.Next(45, 300), 380);
-                        break;
-                    case 4:
-                        obstacle = new Car("Assets/carObstacle2.png", random.Next(45, 300), 0);
-                        break;
-                }
+            switch (obstacleType)
+            {
+                case 1:
+                    obstacle = new Car("Assets/carObstacle1.png", random.Next(45, 300), 0);
+                    break;
+                case 2:
+                    obstacle = new PoliceCar("Assets/carPolice.png", random.Next(45, 300), 0);
+                    break;
+                case 3:
+                    obstacle = new SpeedCar("Assets/speedCar.png", random.Next(45, 300), 380);
+                    break;
+                case 4:
+                    obstacle = new Car("Assets/carObstacle2.png", random.Next(45, 300), 0);
+                    break;
+            }
 
-                if (obstacle != null)
+            if (obstacle != null)
+            {
+                obstacles.Add(obstacle);
+                obstacle.AddMovingImage(GameCanvas);
+
+                // Ensure the obstacle starts at the top of the screen
+                Canvas.SetTop(obstacle._carImage, 0);
+
+                // Get the height of the canvas and the height of the car image
+                double canvasHeight = GameCanvas.ActualHeight;
+                double carHeight = obstacle._carImage.ActualHeight;
+
+                // Set the animation's 'To' value so it moves the car all the way to the bottom
+                double targetPosition = canvasHeight - carHeight;
+
+                // Create an animation to move the obstacle down
+                DoubleAnimation animation = new DoubleAnimation
                 {
-                    obstacles.Add(obstacle);
-                    obstacle.AddMovingImage(GameCanvas);
-                }
-            
+                    From = 0,          // Start at the top of the canvas
+                    To = targetPosition, // Move to the bottom (adjusted for car's height)
+                    Duration = TimeSpan.FromSeconds(3), // Adjust speed
+                    FillBehavior = FillBehavior.Stop // Stops after completion
+                };
+
+                // Apply animation to Canvas.Top
+                Storyboard storyboard = new Storyboard();
+                storyboard.Children.Add(animation);
+                Storyboard.SetTarget(animation, obstacle._carImage);
+                Storyboard.SetTargetProperty(animation, "(Canvas.Top)");
+
+                // Remove obstacle when animation is complete
+                storyboard.Completed += (s, e) =>
+                {
+                    // Remove from the canvas and from the obstacles list
+                    GameCanvas.Children.Remove(obstacle._carImage);
+                    obstacles.Remove(obstacle);
+                };
+
+                // Start the animation
+                storyboard.Begin();
+            }
         }
+
+
+
 
 
 
