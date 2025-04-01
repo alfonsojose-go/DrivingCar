@@ -17,19 +17,18 @@ namespace DrivingCar
     {
         private int currentScore;
         private List<int> scores = new List<int>();
-
-        private const double CarMoveDistance = 10;
-        private const double LeftBoundary = 50;
-        private const double RightBoundary = 300;
         private const double CarStartLeft = 170;  // Original car position
         private const double CarStartTop = 324;
-        private bool gameRunning;
 
+        private bool gameRunning;
+        private Player player;
 
         public MainPage()
         {
             this.InitializeComponent();
             LoadScores();
+            player = new Player(PlayerCar);
+            
 
             // Ensure the GameCanvas is properly loaded
             if (GameCanvas != null)
@@ -41,15 +40,15 @@ namespace DrivingCar
         // Separate method for handling the Loaded event
         private void GameCanvas_Loaded(object sender, RoutedEventArgs e)
         {
-            Car myCar = new Car("Assets/highwayCar.png", 200, 0); // Position at (200, 0)
+            Car myCar = new Car("Assets/carObstacle1.png", 200, 0); // Position at (200, 0)
             myCar.AddMovingImage(GameCanvas); // Add and animate the car
 
             // Create a PoliceCar (twice as fast)
-            PoliceCar police = new PoliceCar("Assets/highwayCar.png", 100, 0);
+            PoliceCar police = new PoliceCar("Assets/carPolice.png", 100, 0);
             police.AddMovingImage(GameCanvas);
 
             // Create a SpeedCar (faster)
-            SpeedCar speed = new SpeedCar("Assets/highwayCar.png", 250, 0);
+            SpeedCar speed = new SpeedCar("Assets/speedCar.png", 250, 0);
             speed.AddMovingImage(GameCanvas);
 
 
@@ -57,39 +56,17 @@ namespace DrivingCar
 
         private void btnLeft_Click(object sender, RoutedEventArgs e)
         {
-            tiltCar(-15);
-            MoveCar(-CarMoveDistance);
+            player.tiltLeft();
+            player.MoveLeft();
         }
 
         private void btnRight_Click(object sender, RoutedEventArgs e)
         {
-            tiltCar(15);
-            MoveCar(CarMoveDistance);
+            player.tiltRight();
+            player.MoveRight();
         }
 
-        private void MoveCar(double distance)
-        {
-            double currentLeft = Canvas.GetLeft(PlayerCar);
-            double newLeft = currentLeft + distance;
-
-            if (newLeft < LeftBoundary || newLeft > RightBoundary)
-            {
-                EndGame();
-                return;
-            }
-
-            Canvas.SetLeft(PlayerCar, newLeft);
-            currentScore++;
-            lblScore.Text = currentScore.ToString();
-        }
-
-        private void tiltCar(double angle)
-        {
-            RotateTransform rotateTransform = new RotateTransform();
-            rotateTransform.Angle = angle;
-            PlayerCar.RenderTransform = rotateTransform;
-        }
-
+        
         private void EndGame()
         {
             btnStart.Content = "Start";
@@ -109,7 +86,7 @@ namespace DrivingCar
             // Move car back to original position
             Canvas.SetLeft(PlayerCar, CarStartLeft);
             Canvas.SetTop(PlayerCar, CarStartTop);
-            tiltCar(0);
+            player.resetTilt();
         }
 
         private void btnStart_Click(object sender, RoutedEventArgs e)
@@ -166,8 +143,12 @@ namespace DrivingCar
                     btnRight_Click(null, null);
                     break;
                 case VirtualKey.Up:
+                    player.resetTilt();
+                    player.MoveUp();
+                    break;
                 case VirtualKey.Down:
-                    tiltCar(0);
+                    player.resetTilt();
+                    player.MoveDown();
                     break;
                 case VirtualKey.Enter:
                     btnStart_Click(null, null);

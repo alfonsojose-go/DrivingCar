@@ -20,9 +20,9 @@ namespace DrivingCar
         public int CarHeight { get; }
         public string ImagePath { get; }
 
-        protected Image _carImage;
-        protected Canvas _gameCanvas;
-        protected Storyboard _storyboard;
+        public Image _carImage;
+        public Canvas _gameCanvas;
+        public Storyboard _storyboard;
 
         public Car(string imagePath, int xPos, int yPos, double speed = DefaultSpeed, int carWidth = DefaultWidth, int carHeight = DefaultHeight)
         {

@@ -123,6 +123,7 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Player.cs" />
     <Compile Include="PoliceCar.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpeedCar.cs" />
@@ -134,6 +135,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\highwayCar.png" />
+    <Content Include="Assets\carObstacle1.png" />
+    <Content Include="Assets\carObstacle2.png" />
+    <Content Include="Assets\carPolice.png" />
+    <Content Include="Assets\speedCar.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -142,6 +147,7 @@
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+    <Content Include="speedCar.png" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
