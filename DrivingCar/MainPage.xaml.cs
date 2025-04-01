@@ -11,48 +11,108 @@ using Windows.UI.Xaml.Shapes;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Media.Animation;
 
+
 namespace DrivingCar
 {
     public sealed partial class MainPage : Page
     {
         private int currentScore;
         private List<int> scores = new List<int>();
-        private const double CarStartLeft = 170;  // Original car position
+        private const double CarStartLeft = 170;
         private const double CarStartTop = 324;
-
         private bool gameRunning;
         private Player player;
+        private DispatcherTimer gameTimer;
+        private DispatcherTimer spawnTimer;
+        private List<Car> obstacles = new List<Car>();
+        private Random random = new Random();
 
         public MainPage()
         {
             this.InitializeComponent();
             LoadScores();
             player = new Player(PlayerCar);
-            
+            gameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+            gameTimer.Tick += GameLoop;
 
-            // Ensure the GameCanvas is properly loaded
-            if (GameCanvas != null)
+            // Set up the spawn timer to control obstacle spawning at a specific interval
+            spawnTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) }; // Set the interval to 2 seconds or any desired value
+            spawnTimer.Tick += SpawnObstacleTimed;
+
+        }
+
+        private void SpawnObstacleTimed(object sender, object e)
+        {
+            // Only spawn obstacles if the game is running
+            if (gameRunning)
             {
-                GameCanvas.Loaded += GameCanvas_Loaded;
+                SpawnObstacles();
             }
         }
 
-        // Separate method for handling the Loaded event
-        private void GameCanvas_Loaded(object sender, RoutedEventArgs e)
+
+        private void SpawnObstacles()
         {
-            Car myCar = new Car("Assets/carObstacle1.png", 200, 0); // Position at (200, 0)
-            myCar.AddMovingImage(GameCanvas); // Add and animate the car
+                int obstacleType = random.Next(1, 5); // Random number between 1 and 4
+                Car obstacle = null;
 
-            // Create a PoliceCar (twice as fast)
-            PoliceCar police = new PoliceCar("Assets/carPolice.png", 100, 0);
-            police.AddMovingImage(GameCanvas);
+                switch (obstacleType)
+                {
+                    case 1:
+                        obstacle = new Car("Assets/carObstacle1.png", random.Next(45, 300), 0);
+                        break;
+                    case 2:
+                        obstacle = new PoliceCar("Assets/carPolice.png", random.Next(45, 300), 0);
+                        break;
+                    case 3:
+                        obstacle = new SpeedCar("Assets/speedCar.png", random.Next(45, 300), 380);
+                        break;
+                    case 4:
+                        obstacle = new Car("Assets/carObstacle2.png", random.Next(45, 300), 0);
+                        break;
+                }
 
-            // Create a SpeedCar (faster)
-            SpeedCar speed = new SpeedCar("Assets/speedCar.png", 250, 0);
-            speed.AddMovingImage(GameCanvas);
-
-
+                if (obstacle != null)
+                {
+                    obstacles.Add(obstacle);
+                    obstacle.AddMovingImage(GameCanvas);
+                }
+            
         }
+
+
+
+
+        private void GameLoop(object sender, object e)
+        {
+            if (!gameRunning) return;
+
+            // Check for collisions before spawning new obstacles
+            bool crashDetected = false;
+
+            // Check for collisions with all obstacles
+            foreach (var obstacle in obstacles)
+            {
+                if (player.CheckCrash(obstacle)) // Check for a collision with the player
+                {
+                    crashDetected = true; // If a crash is detected, stop spawning and handle the crash
+                    break;
+                }
+            }
+
+            if (crashDetected)
+            {
+                EndGame(); // Handle end game logic if a crash occurred
+                return; // Stop further processing, no need to spawn new obstacles
+            }
+
+            // Update the score
+            currentScore++;
+            lblScore.Text = currentScore.ToString();
+        }
+
+
+
 
         private void btnLeft_Click(object sender, RoutedEventArgs e)
         {
@@ -66,36 +126,51 @@ namespace DrivingCar
             player.MoveRight();
         }
 
-        
         private void EndGame()
         {
+            gameRunning = false;
+            gameTimer.Stop();
+            spawnTimer.Stop(); // Stop the spawn timer as well
             btnStart.Content = "Start";
             lblCrashScore.Text = $"Score: {currentScore}";
             lblCrashScore.Visibility = Visibility.Visible;
 
-            // Save and update score history
             scores.Add(currentScore);
-            scores = scores.OrderByDescending(s => s).Take(5).ToList();  // Keep only top 5 scores
+            scores = scores.OrderByDescending(s => s).Take(5).ToList();
             SaveScores();
             UpdateScoreDisplay();
 
-            // Reset game state
+            // Clear obstacles from the canvas
+            foreach (var obstacle in obstacles)
+            {
+                GameCanvas.Children.Remove(obstacle._carImage); // Assuming _carImage is the Image object
+            }
+            obstacles.Clear();
+
             currentScore = 0;
             lblScore.Text = "0";
-
-            // Move car back to original position
             Canvas.SetLeft(PlayerCar, CarStartLeft);
             Canvas.SetTop(PlayerCar, CarStartTop);
             player.resetTilt();
         }
 
+
         private void btnStart_Click(object sender, RoutedEventArgs e)
         {
+            gameRunning = true;
             btnStart.Content = "Playing..";
             lblCrashScore.Visibility = Visibility.Collapsed;
+            currentScore = 0;
+            lblScore.Text = "0";
+            obstacles.Clear(); // Clear any previous obstacles before starting
 
+            // Start the main game loop timer
+            gameTimer.Start();
 
+            // Start the obstacle spawning timer
+            spawnTimer.Start();
         }
+
 
         private void btnExit_Click(object sender, RoutedEventArgs e)
         {
@@ -117,7 +192,7 @@ namespace DrivingCar
                 string scoreData = (string)localSettings.Values["ScoreHistory"];
                 scores = scoreData.Split(',').Where(s => !string.IsNullOrWhiteSpace(s))
                                     .Select(int.Parse).OrderByDescending(s => s)
-                                    .Take(5).ToList();  // Keep only top 5 scores
+                                    .Take(5).ToList();
                 UpdateScoreDisplay();
             }
         }
@@ -158,11 +233,6 @@ namespace DrivingCar
                     break;
             }
             e.Handled = true;
-
-
-      
         }
-
-
     }
 }

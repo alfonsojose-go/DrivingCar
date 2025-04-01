@@ -11,7 +11,7 @@ namespace DrivingCar
     public class SpeedCar : Car
     {
         private const double SpeedMultiplier = 0.5; // ✅ 2x Faster
-        private Canvas _gameCanvas;
+        private new Canvas _gameCanvas;
         private Polygon _warningTriangle; // 🚨 Red triangle indicator
 
         public SpeedCar(string imagePath, int xPos, int yPos, double speed = DefaultSpeed * SpeedMultiplier,
@@ -20,7 +20,7 @@ namespace DrivingCar
         {
         }
 
-        public void AddMovingImage(Canvas gameCanvas)
+        public override void AddMovingImage(Canvas gameCanvas)
         {
             _gameCanvas = gameCanvas;
 
@@ -31,7 +31,10 @@ namespace DrivingCar
             AddWarningTriangle();
 
             // Add SpeedCar Image
-            base.AddMovingImage(gameCanvas);
+            base.AddMovingImage(_gameCanvas);
+
+            // Start Moving Animation
+            StartAnimation();
         }
 
         private void AddWarningTriangle()
@@ -51,6 +54,8 @@ namespace DrivingCar
             };
 
             _gameCanvas.Children.Add(_warningTriangle);
+
+            
         }
 
 

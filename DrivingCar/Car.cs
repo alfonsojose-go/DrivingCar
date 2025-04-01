@@ -34,7 +34,7 @@ namespace DrivingCar
             CarHeight = carHeight;
         }
 
-        public void AddMovingImage(Canvas gameCanvas)
+        public virtual void AddMovingImage(Canvas gameCanvas)
         {
             _gameCanvas = gameCanvas;
 

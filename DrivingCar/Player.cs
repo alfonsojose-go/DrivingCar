@@ -80,18 +80,32 @@ namespace DrivingCar
         public void resetTilt() => tiltCar(0);
 
         // Check for crash with another car
-        public bool CheckCrash(Car otherCar)
+        public bool CheckCrash(Car obstacle)
         {
+            // Get the player's position and size
             double playerLeft = Canvas.GetLeft(PlayerCar);
             double playerTop = Canvas.GetTop(PlayerCar);
-            double otherLeft = Canvas.GetLeft(otherCar._carImage);
-            double otherTop = Canvas.GetTop(otherCar._carImage);
+            double playerRight = playerLeft + PlayerCar.Width /2;
+            double playerBottom = playerTop + PlayerCar.Height /2;
 
-            double crashThreshold = 30;
+            // Get the obstacle's position and size
+            double obstacleLeft = Canvas.GetLeft(obstacle._carImage);
+            double obstacleTop = Canvas.GetTop(obstacle._carImage);
+            double obstacleRight = obstacleLeft + obstacle._carImage.Width / 2;
+            double obstacleBottom = obstacleTop + obstacle._carImage.Height / 2;
 
-            double distance = Math.Sqrt(Math.Pow(playerLeft - otherLeft, 2) + Math.Pow(playerTop - otherTop, 2));
-            return distance < crashThreshold;
+            // Collision detection with buffer (e.g., 5px margin around the player car)
+            double collisionBuffer = 0.5; // Adjust this value as needed
+
+            bool isCollision = !(playerRight + collisionBuffer < obstacleLeft ||
+                                 playerLeft - collisionBuffer > obstacleRight ||
+                                 playerBottom + collisionBuffer < obstacleTop ||
+                                 playerTop - collisionBuffer > obstacleBottom);
+
+            return isCollision;
         }
+
+
 
         // Handle crash logic (reset player's car position and stop the game)
         public void Crash()
