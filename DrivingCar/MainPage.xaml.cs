@@ -25,8 +25,6 @@ namespace DrivingCar
         private const double CarStartTop = 324;
         private bool gameRunning;
 
-        private const double carWidth = 56;
-        private const double carHeigth = 74;
 
         public MainPage()
         {
@@ -43,7 +41,18 @@ namespace DrivingCar
         // Separate method for handling the Loaded event
         private void GameCanvas_Loaded(object sender, RoutedEventArgs e)
         {
-            AddMovingImage("Assets/highwayCar.png");
+            Car myCar = new Car("Assets/highwayCar.png", 200, 0); // Position at (200, 0)
+            myCar.AddMovingImage(GameCanvas); // Add and animate the car
+
+            // Create a PoliceCar (twice as fast)
+            PoliceCar police = new PoliceCar("Assets/highwayCar.png", 100, 0);
+            police.AddMovingImage(GameCanvas);
+
+            // Create a SpeedCar (faster)
+            SpeedCar speed = new SpeedCar("Assets/highwayCar.png", 250, 0);
+            speed.AddMovingImage(GameCanvas);
+
+
         }
 
         private void btnLeft_Click(object sender, RoutedEventArgs e)
@@ -172,58 +181,6 @@ namespace DrivingCar
 
       
         }
-
-
-
-        public void AddMovingImage(string imagePath)
-        {
-            // Create Image
-            Image img = new Image
-            {
-                Width = carWidth,
-                Height = carHeigth,
-
-            };
-
-            // Load Image Source
-            string fullPath = $"ms-appx:///{imagePath.TrimStart('/')}";
-            BitmapImage bitmap = new BitmapImage(new Uri(fullPath, UriKind.Absolute));
-            img.Source = bitmap;
-
-            // Set initial position
-            Canvas.SetLeft(img, 200); // Center horizontally
-            Canvas.SetTop(img, 0);    // Start at the top
-
-            // Add to Canvas
-            GameCanvas.Children.Add(img);
-
-            // Ensure Canvas Height is Available
-            double targetHeight = GameCanvas.ActualHeight > 0 ? GameCanvas.ActualHeight : 500;
-
-            // Create Animation
-            DoubleAnimation animation = new DoubleAnimation
-            {
-                From = 0,
-                To = targetHeight - carHeigth,
-                Duration = new Duration(TimeSpan.FromSeconds(3)),
-                AutoReverse = false,
-                RepeatBehavior = new RepeatBehavior(1)
-            };
-
-            // Apply Animation to Canvas.Top Property
-            Storyboard storyboard = new Storyboard();
-            Storyboard.SetTarget(animation, img);
-            Storyboard.SetTargetProperty(animation, "(Canvas.Top)");
-            storyboard.Children.Add(animation);
-
-            // Start Animation on UI Thread
-            Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-            {
-                storyboard.Begin();
-            });
-        }
-
-    
 
 
     }
