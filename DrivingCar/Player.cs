@@ -9,7 +9,7 @@ namespace DrivingCar
     {
         public Image PlayerCar { get; private set; }
         private const double CarMoveDistance = 10;
-        private const double LeftBoundary = 50;
+        private const double LeftBoundary = 45;
         private const double RightBoundary = 300;
         private const double TopBoundary = 0;
         private const double BottomBoundary = 324;
