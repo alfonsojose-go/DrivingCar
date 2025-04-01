@@ -11,11 +11,11 @@ namespace DrivingCar
     {
         public const int DefaultWidth = 56;
         public const int DefaultHeight = 74;
-        public const double DefaultSpeed = 7.0;
+        public const double DefaultSpeed = 8.0;
 
-        public int XPos { get; }
+        public int XPos { get; set; }
         public int YPos { get; set; }
-        public double Speed { get; }
+        public double Speed { get; set; }
         public int CarWidth { get; }
         public int CarHeight { get; }
         public string ImagePath { get; }

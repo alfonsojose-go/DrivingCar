@@ -13,8 +13,8 @@ namespace DrivingCar
         private const double RightBoundary = 300;
         private const double TopBoundary = 0;
         private const double BottomBoundary = 324;
-        private const double CarStartLeft = 170;
-        private const double CarStartTop = 324;
+        private const double CarStartLeft = 171;
+        private const double CarStartTop = 228;
 
         public Player(Image car)
         {

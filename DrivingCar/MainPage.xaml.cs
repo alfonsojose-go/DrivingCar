@@ -18,14 +18,17 @@ namespace DrivingCar
     {
         private int currentScore;
         private List<int> scores = new List<int>();
-        private const double CarStartLeft = 170;
-        private const double CarStartTop = 324;
+        private const double CarStartLeft = 171;
+        private const double CarStartTop = 228;
         private bool gameRunning;
         private Player player;
         private DispatcherTimer gameTimer;
         private DispatcherTimer spawnTimer;
         private List<Car> obstacles = new List<Car>();
         private Random random = new Random();
+        public double startSpeed = 8.0;
+        public double timeInterval = 2.0;
+
 
         public MainPage()
         {
@@ -36,39 +39,76 @@ namespace DrivingCar
             gameTimer.Tick += GameLoop;
 
             // Set up the spawn timer to control obstacle spawning at a specific interval
-            spawnTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) }; // Set the interval to 2 seconds or any desired value
+            spawnTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(timeInterval) }; // Set the interval to 2 seconds or any desired value
             spawnTimer.Tick += SpawnObstacleTimed;
 
         }
+
+
+
 
         private void SpawnObstacleTimed(object sender, object e)
         {
             // Only spawn obstacles if the game is running
             if (gameRunning)
             {
-                SpawnObstacles();
+                // Reduce speed only when crossing a new multiple of 100
+                if (currentScore % 100 == 0)
+                {
+                    startSpeed -= 1.0;
+                    timeInterval -= 0.25;
+                    // Decrease speed and interval, ensuring they do not go below their minimum values
+                    if (startSpeed > 1.0)
+                    {
+
+                        startSpeed = Math.Max(1.0, startSpeed);  // Ensure startSpeed doesn't go below 1.0
+                        timeInterval = Math.Max(0.25, timeInterval);  // Ensure timeInterval doesn't go below 0
+                        StartSpawnTimer(timeInterval);
+
+                    }
+                    else 
+                    {
+                        startSpeed = Math.Max(1.0, startSpeed);  // Ensure startSpeed doesn't go below 1.0
+                        timeInterval = Math.Max(0.25, timeInterval);  // Ensure timeInterval doesn't go below 0
+                        StartSpawnTimer(timeInterval);
+                    }
+
+                    
+                }
+
+                SpawnObstacles(startSpeed); // Pass startSpeed explicitly
             }
         }
 
+        private void StartSpawnTimer(double intervalInSeconds)
+        {
+            spawnTimer.Interval = TimeSpan.FromSeconds(intervalInSeconds); // Adjust interval
+            spawnTimer.Start(); // Restart the timer
+            SpawnObstacles(startSpeed);
+        }
 
-        private void SpawnObstacles()
+
+
+
+        private void SpawnObstacles(double levelSpeed)
         {
             int obstacleType = random.Next(1, 5); // Random number between 1 and 4
+           
             Car obstacle = null;
 
             switch (obstacleType)
             {
                 case 1:
-                    obstacle = new Car("Assets/carObstacle1.png", random.Next(45, 300), 0);
+                    obstacle = new Car("Assets/carObstacle1.png", random.Next(45, 300), 0, levelSpeed);
                     break;
                 case 2:
-                    obstacle = new PoliceCar("Assets/carPolice.png", random.Next(45, 300), 0);
+                    obstacle = new PoliceCar("Assets/carPolice.png", random.Next(45, 300),0, levelSpeed);
                     break;
                 case 3:
-                    obstacle = new SpeedCar("Assets/speedCar.png", random.Next(45, 300), 380);
+                    obstacle = new SpeedCar("Assets/speedCar.png", random.Next(45, 300), 380, levelSpeed);
                     break;
                 case 4:
-                    obstacle = new Car("Assets/carObstacle2.png", random.Next(45, 300), 0);
+                    obstacle = new Car("Assets/carObstacle2.png", random.Next(45, 300), 0, levelSpeed);
                     break;
             }
 
@@ -114,12 +154,6 @@ namespace DrivingCar
                 storyboard.Begin();
             }
         }
-
-
-
-
-
-
 
         private void GameLoop(object sender, object e)
         {
@@ -187,6 +221,9 @@ namespace DrivingCar
 
             currentScore = 0;
             lblScore.Text = "0";
+            timeInterval = 2.0;
+            StartSpawnTimer(timeInterval);
+            startSpeed = 7.0;
             Canvas.SetLeft(PlayerCar, CarStartLeft);
             Canvas.SetTop(PlayerCar, CarStartTop);
             player.resetTilt();
@@ -202,11 +239,16 @@ namespace DrivingCar
             lblScore.Text = "0";
             obstacles.Clear(); // Clear any previous obstacles before starting
 
+            startSpeed = 7.0;
+            
+
             // Start the main game loop timer
             gameTimer.Start();
 
             // Start the obstacle spawning timer
-            spawnTimer.Start();
+            timeInterval = 2.0;
+            StartSpawnTimer(timeInterval);
+
         }
 
 

@@ -27,8 +27,8 @@
                    Width="56"
                    Height="74"
                    Stretch="Uniform"
-                   Canvas.Left="170"
-                   Canvas.Top="324"
+                   Canvas.Left="171"
+                   Canvas.Top="228"
                    RenderTransformOrigin="0.5,0.5">
                 <Image.RenderTransform>
                     <CompositeTransform x:Name="CarTransform" Rotation="0"/>

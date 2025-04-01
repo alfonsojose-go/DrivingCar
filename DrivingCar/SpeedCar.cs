@@ -67,7 +67,7 @@ namespace DrivingCar
                 return;
 
             // Set targetY to move upwards, which is off-screen at the top
-            double targetY = -CarHeight; // Moves off-screen at the top
+            double targetY = -CarHeight - 450; // Moves off-screen at the top
 
 
 
