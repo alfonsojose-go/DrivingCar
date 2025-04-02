@@ -32,6 +32,8 @@ namespace DrivingCar
         private ApplicationView scoreboardView;
         private const string ScoreFile = "scores.json";
 
+        private SoundManager soundManager; // Sound Manager instance
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -46,6 +48,8 @@ namespace DrivingCar
 
             spawnTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
             spawnTimer.Tick += SpawnObstacleTimed;
+
+            soundManager = new SoundManager(); // Initialize Sound Manager
 
             // Hide crash score initially
             lblCrashScore.Visibility = Visibility.Collapsed;
@@ -73,6 +77,7 @@ namespace DrivingCar
                     break;
                 case 2:
                     obstacle = new PoliceCar("Assets/carPolice.png", random.Next(45, 300), 0);
+                    soundManager.PlaySirenSound(); // Play siren when police car appears
                     break;
                 case 3:
                     obstacle = new SpeedCar("Assets/speedCar.png", random.Next(45, 300), 380);
@@ -118,6 +123,12 @@ namespace DrivingCar
                     // Remove from the canvas and from the obstacles list
                     GameCanvas.Children.Remove(obstacle._carImage);
                     obstacles.Remove(obstacle);
+
+                    // Stop siren sound when the police car disappears (after animation completes)
+                    if (obstacle is PoliceCar)
+                    {
+                        soundManager.StopSirenSound();
+                    }
                 };
 
                 // Start the animation
@@ -144,6 +155,11 @@ namespace DrivingCar
                 if (player.CheckCrash(obstacle)) // Check for a collision with the player
                 {
                     crashDetected = true; // If a crash is detected, stop spawning and handle the crash
+                    if (obstacle is PoliceCar)
+                    {
+                        // Stop siren sound if PoliceCar is hit
+                        soundManager.StopSirenSound();
+                    }
                     break;
                 }
             }
@@ -179,9 +195,11 @@ namespace DrivingCar
             gameRunning = false;
             gameTimer.Stop();
             spawnTimer.Stop();
-            btnStart.Content = "Start";
+            btnStart.Content = "Play Again?"; // Change button text to prompt user to play again
             lblCrashScore.Text = $"Score: {currentScore}";
             lblCrashScore.Visibility = Visibility.Visible;
+
+            soundManager.StopEngineSound(); // Stop engine sound when game ends
 
             // Add new score and save it
             if (currentScore > 0)
@@ -217,6 +235,8 @@ namespace DrivingCar
             currentScore = 0;
             lblScore.Text = "0";
             obstacles.Clear(); // Clear any previous obstacles before starting
+
+            soundManager.PlayEngineSound(); // Start engine sound when game starts
 
             // Start the main game loop timer
             gameTimer.Start();

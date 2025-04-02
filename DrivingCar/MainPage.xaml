@@ -48,7 +48,7 @@
                    TextWrapping="Wrap" Text="0" VerticalAlignment="Top"/>
 
         <!-- Buttons -->
-        <Button x:Name="btnStart" Content="Start" Margin="365,495,0,0"
+        <Button x:Name="btnStart" Content="Start" Margin="344,495,0,0"
         VerticalAlignment="Top" Click="btnStart_Click"/>
         <Button x:Name="btnExit" Content="Exit" Margin="372,696,0,0"
         VerticalAlignment="Top" Click="btnExit_Click" Height="30"/>

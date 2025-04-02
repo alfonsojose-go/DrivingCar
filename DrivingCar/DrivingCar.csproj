@@ -129,6 +129,7 @@
     <Compile Include="ScoreBoard.xaml.cs">
       <DependentUpon>ScoreBoard.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SoundManager.cs" />
     <Compile Include="SpeedCar.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -137,10 +138,12 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\drivingsound.wav" />
     <Content Include="Assets\highwayCar.png" />
     <Content Include="Assets\carObstacle1.png" />
     <Content Include="Assets\carObstacle2.png" />
     <Content Include="Assets\carPolice.png" />
+    <Content Include="Assets\policesiren.wav" />
     <Content Include="Assets\speedCar.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
