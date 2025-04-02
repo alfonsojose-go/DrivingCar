@@ -1,0 +1,33 @@
+<Page
+    x:Class="DrivingCar.ScoreBoard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Width="300">
+        <ListView x:Name="ScoreListView">
+            <ListView.HeaderTemplate>
+                <DataTemplate>
+                    <TextBlock Text="ScoreBoard" 
+                             Style="{ThemeResource BaseTextBlockStyle}"
+                             HorizontalAlignment="Center"
+                             Margin="0,0,0,10"/>
+                </DataTemplate>
+            </ListView.HeaderTemplate>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock>
+                        <Run Text="{Binding Rank}"/>
+                        <Run Text=". "/>
+                        <Run Text="{Binding Value}"/>
+                        <Run Text=" ("/>
+                        <Run Text="{Binding Time}"/>
+                        <Run Text=")"/>
+                    </TextBlock>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Page>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Windows.Storage;
@@ -10,35 +10,45 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Media.Animation;
-
+using Windows.UI.ViewManagement;
+using Windows.ApplicationModel.Core;
+using Windows.Data.Json;
+using System.IO;
 
 namespace DrivingCar
 {
     public sealed partial class MainPage : Page
     {
         private int currentScore;
-        private List<int> scores = new List<int>();
+        private List<int> scores;
         private const double CarStartLeft = 170;
         private const double CarStartTop = 324;
         private bool gameRunning;
         private Player player;
         private DispatcherTimer gameTimer;
         private DispatcherTimer spawnTimer;
-        private List<Car> obstacles = new List<Car>();
-        private Random random = new Random();
+        private List<Car> obstacles;
+        private Random random;
+        private ApplicationView scoreboardView;
+        private const string ScoreFile = "scores.json";
 
         public MainPage()
         {
             this.InitializeComponent();
+            scores = new List<int>();
+            obstacles = new List<Car>();
+            random = new Random();
             LoadScores();
+            
             player = new Player(PlayerCar);
             gameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
             gameTimer.Tick += GameLoop;
 
-            // Set up the spawn timer to control obstacle spawning at a specific interval
-            spawnTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) }; // Set the interval to 2 seconds or any desired value
+            spawnTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
             spawnTimer.Tick += SpawnObstacleTimed;
 
+            // Hide crash score initially
+            lblCrashScore.Visibility = Visibility.Collapsed;
         }
 
         private void SpawnObstacleTimed(object sender, object e)
@@ -140,7 +150,7 @@ namespace DrivingCar
 
             if (crashDetected)
             {
-                EndGame(); // Handle end game logic if a crash occurred
+                GameOver(); // Handle end game logic if a crash occurred
                 return; // Stop further processing, no need to spawn new obstacles
             }
 
@@ -164,32 +174,38 @@ namespace DrivingCar
             player.MoveRight();
         }
 
-        private void EndGame()
+        private void GameOver()
         {
             gameRunning = false;
             gameTimer.Stop();
-            spawnTimer.Stop(); // Stop the spawn timer as well
+            spawnTimer.Stop();
             btnStart.Content = "Start";
             lblCrashScore.Text = $"Score: {currentScore}";
             lblCrashScore.Visibility = Visibility.Visible;
 
-            scores.Add(currentScore);
-            scores = scores.OrderByDescending(s => s).Take(5).ToList();
-            SaveScores();
-            UpdateScoreDisplay();
+            // Add new score and save it
+            if (currentScore > 0)
+            {
+                scores.Add(currentScore);
+                SaveScores();
+            }
 
-            // Clear obstacles from the canvas
+            // Clear obstacles
             foreach (var obstacle in obstacles)
             {
-                GameCanvas.Children.Remove(obstacle._carImage); // Assuming _carImage is the Image object
+                GameCanvas.Children.Remove(obstacle._carImage);
             }
             obstacles.Clear();
 
+            // Reset player position
             currentScore = 0;
             lblScore.Text = "0";
             Canvas.SetLeft(PlayerCar, CarStartLeft);
             Canvas.SetTop(PlayerCar, CarStartTop);
             player.resetTilt();
+
+            // Re-enable scoreboard button
+            btnScoreboard.IsEnabled = true;
         }
 
 
@@ -207,6 +223,9 @@ namespace DrivingCar
 
             // Start the obstacle spawning timer
             spawnTimer.Start();
+
+            // Disable scoreboard button during gameplay
+            btnScoreboard.IsEnabled = false;
         }
 
 
@@ -215,33 +234,96 @@ namespace DrivingCar
             Application.Current.Exit();
         }
 
-        private void SaveScores()
+        private async void SaveScores()
         {
-            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            string scoreData = string.Join(",", scores);
-            localSettings.Values["ScoreHistory"] = scoreData;
+            try
+            {
+                var storageFolder = ApplicationData.Current.LocalFolder;
+                var file = await storageFolder.CreateFileAsync(ScoreFile, CreationCollisionOption.ReplaceExisting);
+
+                var jsonArray = new JsonArray();
+                foreach (var score in scores.OrderByDescending(s => s).Take(5))
+                {
+                    var jsonObject = new JsonObject();
+                    jsonObject.SetNamedValue("PlayerName", JsonValue.CreateStringValue("Player"));
+                    jsonObject.SetNamedValue("PlayerScore", JsonValue.CreateNumberValue(score));
+                    jsonObject.SetNamedValue("Time", JsonValue.CreateStringValue(DateTime.Now.ToString("MM/dd/yyyy")));
+                    jsonArray.Add(jsonObject);
+                }
+
+                await FileIO.WriteTextAsync(file, jsonArray.ToString());
+                LoadScores();
+            }
+            catch (Exception ex)
+            {
+                #if DEBUG
+                System.Diagnostics.Debug.WriteLine($"Error saving scores: {ex}");
+                #endif
+            }
         }
 
-        private void LoadScores()
+        private class ScoreInfo
         {
-            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            if (localSettings.Values.ContainsKey("ScoreHistory"))
+            public int Score { get; set; }
+            public string Time { get; set; }
+        }
+
+        private List<ScoreInfo> scoreInfos = new List<ScoreInfo>();
+
+        private async void LoadScores()
+        {
+            try
             {
-                string scoreData = (string)localSettings.Values["ScoreHistory"];
-                scores = scoreData.Split(',').Where(s => !string.IsNullOrWhiteSpace(s))
-                                    .Select(int.Parse).OrderByDescending(s => s)
-                                    .Take(5).ToList();
-                UpdateScoreDisplay();
+                var storageFolder = ApplicationData.Current.LocalFolder;
+                var file = await storageFolder.GetFileAsync(ScoreFile);
+                var json = await FileIO.ReadTextAsync(file);
+
+                scores.Clear();
+                scoreInfos.Clear();
+                
+                if (!string.IsNullOrEmpty(json))
+                {
+                    var jsonArray = JsonArray.Parse(json);
+                    foreach (var item in jsonArray)
+                    {
+                        var obj = item.GetObject();
+                        var score = (int)obj.GetNamedNumber("PlayerScore");
+                        var time = obj.GetNamedString("Time", DateTime.Now.ToString("MM/dd/yyyy"));
+                        scores.Add(score);
+                        scoreInfos.Add(new ScoreInfo { Score = score, Time = time });
+                    }
+                }
             }
+            catch (FileNotFoundException)
+            {
+                scores = new List<int>();
+                scoreInfos = new List<ScoreInfo>();
+            }
+            catch (Exception ex)
+            {
+                #if DEBUG
+                System.Diagnostics.Debug.WriteLine($"Error loading scores: {ex}");
+                #endif
+                scores = new List<int>();
+                scoreInfos = new List<ScoreInfo>();
+            }
+
+            UpdateScoreDisplay();
         }
 
         private void UpdateScoreDisplay()
         {
             lstScores.Items.Clear();
-            foreach (int score in scores)
+            
+            var topScores = scoreInfos.OrderByDescending(s => s.Score).Take(5);
+            int rank = 1;
+            
+            foreach (var score in topScores)
             {
-                lstScores.Items.Add($"Score: {score}");
+                lstScores.Items.Add($"{rank}. {score.Score} ({score.Time})");
+                rank++;
             }
+
             lstScores.Visibility = scores.Any() ? Visibility.Visible : Visibility.Collapsed;
         }
 
@@ -271,6 +353,27 @@ namespace DrivingCar
                     break;
             }
             e.Handled = true;
+        }
+
+        private async void btnScoreboard_Click(object sender, RoutedEventArgs e)
+        {
+            CoreApplicationView newView = CoreApplication.CreateNewView();
+            int newViewId = 0;
+            await newView.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                Frame frame = new Frame();
+                frame.Navigate(typeof(ScoreBoard));
+                Window.Current.Content = frame;
+                Window.Current.Activate();
+                newViewId = ApplicationView.GetForCurrentView().Id;
+            });
+
+            bool viewShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId);
+        }
+
+        private void lstScores_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 }

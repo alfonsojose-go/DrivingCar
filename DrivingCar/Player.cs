@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ServiceModel.Channels;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
