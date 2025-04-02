@@ -8,11 +8,18 @@ namespace DrivingCar
     {
         private MediaPlayer enginePlayer;
         private MediaPlayer sirenPlayer;
+        private MediaPlayer crashPlayer;
+        private MediaPlayer levelUpPlayer;
 
         public SoundManager()
         {
             enginePlayer = new MediaPlayer();
             sirenPlayer = new MediaPlayer();
+            crashPlayer = new MediaPlayer();
+
+            // Set crash sound source once
+            crashPlayer.Source = MediaSource.CreateFromUri(new Uri("ms-appx:///Assets/explosion.wav"));
+            levelUpPlayer.Source = MediaSource.CreateFromUri(new Uri("ms-appx:///Assets/levelup.wav")); // Add level-up sound
         }
 
         public void PlayEngineSound()
@@ -35,8 +42,17 @@ namespace DrivingCar
 
         public void StopSirenSound()
         {
-            sirenPlayer.Pause(); // Stops the siren sound when the car disappears
+            sirenPlayer.Pause();
         }
 
+        public void PlayCrashSound()
+        {
+            crashPlayer.Play();
+        }
+
+        public void PlayLevelUpSound() // Method to play level-up sound
+        {
+            levelUpPlayer.Play();
+        }
     }
 }

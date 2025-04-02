@@ -139,10 +139,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\drivingsound.wav" />
+    <Content Include="Assets\explosion.wav" />
     <Content Include="Assets\highwayCar.png" />
     <Content Include="Assets\carObstacle1.png" />
     <Content Include="Assets\carObstacle2.png" />
     <Content Include="Assets\carPolice.png" />
+    <Content Include="Assets\levelup.wav" />
     <Content Include="Assets\policesiren.wav" />
     <Content Include="Assets\speedCar.png" />
     <Content Include="Properties\Default.rd.xml" />

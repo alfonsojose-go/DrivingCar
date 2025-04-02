@@ -14,6 +14,7 @@ using Windows.UI.ViewManagement;
 using Windows.ApplicationModel.Core;
 using Windows.Data.Json;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace DrivingCar
 {
@@ -21,8 +22,8 @@ namespace DrivingCar
     {
         private int currentScore;
         private List<int> scores;
-        private const double CarStartLeft = 170;
-        private const double CarStartTop = 324;
+        private const double CarStartLeft = 171;
+        private const double CarStartTop = 228;
         private bool gameRunning;
         private Player player;
         private DispatcherTimer gameTimer;
@@ -146,6 +147,7 @@ namespace DrivingCar
         {
             if (!gameRunning) return;
 
+
             // Check for collisions before spawning new obstacles
             bool crashDetected = false;
 
@@ -166,6 +168,7 @@ namespace DrivingCar
 
             if (crashDetected)
             {
+                soundManager.PlayCrashSound(); // Play crash sound on collision
                 GameOver(); // Handle end game logic if a crash occurred
                 return; // Stop further processing, no need to spawn new obstacles
             }
@@ -182,13 +185,32 @@ namespace DrivingCar
         {
             player.tiltLeft();
             player.MoveLeft();
+            //await Task.Delay(100); // Small delay to simulate key press effect
+            //player.resetTilt();
         }
 
         private void btnRight_Click(object sender, RoutedEventArgs e)
         {
             player.tiltRight();
             player.MoveRight();
+            //await Task.Delay(100); // Small delay to simulate key press effect
+            //player.resetTilt();
         }
+
+
+
+        private void btnUp_Click(object sender, RoutedEventArgs e)
+        {
+            player.resetTilt();
+            player.MoveUp();
+        }
+
+        private void btnDown_Click(object sender, RoutedEventArgs e)
+        {
+            player.resetTilt();
+            player.MoveDown();
+        }
+
 
         private void GameOver()
         {
@@ -213,6 +235,7 @@ namespace DrivingCar
             {
                 GameCanvas.Children.Remove(obstacle._carImage);
             }
+
             obstacles.Clear();
 
             // Reset player position
@@ -224,6 +247,8 @@ namespace DrivingCar
 
             // Re-enable scoreboard button
             btnScoreboard.IsEnabled = true;
+
+            btnStart.IsEnabled = true;
         }
 
 
@@ -231,6 +256,7 @@ namespace DrivingCar
         {
             gameRunning = true;
             btnStart.Content = "Playing..";
+            btnStart.IsEnabled = false;
             lblCrashScore.Visibility = Visibility.Collapsed;
             currentScore = 0;
             lblScore.Text = "0";
@@ -365,6 +391,20 @@ namespace DrivingCar
                     player.resetTilt();
                     player.MoveDown();
                     break;
+                case VirtualKey.A:
+                    btnLeft_Click(null, null);
+                    break;
+                case VirtualKey.D:
+                    btnRight_Click(null, null);
+                    break;
+                case VirtualKey.W:
+                    player.resetTilt();
+                    player.MoveUp();
+                    break;
+                case VirtualKey.S:
+                    player.resetTilt();
+                    player.MoveDown();
+                    break;
                 case VirtualKey.Enter:
                     btnStart_Click(null, null);
                     break;
@@ -374,6 +414,25 @@ namespace DrivingCar
             }
             e.Handled = true;
         }
+
+        private void Page_KeyUp(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == VirtualKey.Left || e.Key == VirtualKey.Right || e.Key == VirtualKey.A || e.Key == VirtualKey.D)
+            {
+                player.resetTilt(); // Reset tilt when key is released
+            }
+            e.Handled = true;
+        }
+
+
+
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.Focus(FocusState.Programmatic); // Ensure the page gets keyboard focus
+        }
+
+
 
         private async void btnScoreboard_Click(object sender, RoutedEventArgs e)
         {

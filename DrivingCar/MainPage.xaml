@@ -7,7 +7,9 @@
       mc:Ignorable="d"
       Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
       Height="810" Width="476"
-      KeyDown="Page_KeyDown">
+      KeyDown="Page_KeyDown"
+      KeyUp="Page_KeyUp"
+      Loaded="Page_Loaded">
 
     <Grid Height="789" VerticalAlignment="Center">
         <!-- Game Canvas -->
@@ -56,15 +58,20 @@
         VerticalAlignment="Top" Click="btnScoreboard_Click" Style="{StaticResource AccentButtonStyle}" Height="30"/>
 
         <!-- Arrange Left and Right buttons logically -->
-        <Button x:Name="btnLeft" Content="←" Margin="179,495,0,0"
+        <Button x:Name="btnLeft" Content="←" Margin="181,511,0,0"
         VerticalAlignment="Top" Click="btnLeft_Click"/>
-        <Button x:Name="btnRight" Content="→" Margin="249,495,0,0"
+        <Button x:Name="btnRight" Content="→" Margin="261,511,0,0"
         VerticalAlignment="Top" Click="btnRight_Click"/>
+        <Button x:Name="btnUp" Content="↑" Margin="0,486,0,0"
+        VerticalAlignment="Top" Click="btnUp_Click" HorizontalAlignment="Center"/>
+        <Button x:Name="btnDown" Content="↓" Margin="0,527,0,0"
+        VerticalAlignment="Top" Click="btnDown_Click" HorizontalAlignment="Center"/>
+
 
 
         <!-- Crash Score Display -->
-        <TextBlock x:Name="lblCrashScore" HorizontalAlignment="Left" VerticalAlignment="Top"
-                   TextWrapping="Wrap" Text="Score: 0" FontSize="38" FontFamily="Arial Black" Margin="110,150,0,0"/>
+        <TextBlock x:Name="lblCrashScore" HorizontalAlignment="Center" VerticalAlignment="Top"
+                   TextWrapping="Wrap" Text="Score: 0" FontSize="38" FontFamily="Arial Black" Margin="0,146,0,0"/>
 
         <!-- Score List -->
         <ListBox x:Name="lstScores" 
