@@ -15,10 +15,16 @@ namespace DrivingCar
         public List<Car> ActiveCars { get; } = new List<Car>();
 
         // Difficulty parameters (using your exact values)
-        private int checkpoint = 250;
-        private double _spawnInterval;
-        public double BaseSpeed = 8.0;
-        public const double BaseSpawnInterval = 5.0;
+        private const int checkpoint = 250;
+        private int targetScore = 0;
+        private int levelCount = 0;
+        public double _levelInterval;
+        public double _levelSpeed;
+        public const double BaseSpeed = 8.0;
+        private double _speedMultiplier = 1.0;
+        public const double MinSpeed = 1.0;
+        public const double BaseSpawnInterval = 2.0;
+        private double _timeIntervalMultiplier = 0.25;
         public const double MinSpawnInterval = 0.25;
         private int _currentDifficultyTier = 0;
        
@@ -37,10 +43,20 @@ namespace DrivingCar
         {
             // Difficulty increases every 250 points
             
-            // Play sound every 100 points (including when tier increases)
-            if (currentScore % checkpoint == 0)
+            
+            if (currentScore > targetScore)
             {
-                _spawnInterval = CalculateCurrentSpawnInterval();
+            
+                double calculatedInterval = BaseSpawnInterval - (_timeIntervalMultiplier * levelCount);
+                _levelInterval = Math.Max(MinSpawnInterval, calculatedInterval);
+
+                double calculatedSpeed = BaseSpeed - (_speedMultiplier * levelCount);
+                _levelSpeed = Math.Max(MinSpeed, calculatedSpeed);
+
+                levelCount++;
+                targetScore += checkpoint;
+
+
                 try
                 {
                     _soundManager?.PlayLevelUpSound();
@@ -54,16 +70,10 @@ namespace DrivingCar
             
         }
 
-        private double CalculateCurrentSpawnInterval()
-        {
-            
-            double calculatedInterval = BaseSpawnInterval * Math.Pow(0.9, _currentDifficultyTier);
-            return Math.Max(MinSpawnInterval, calculatedInterval);
-        }
 
-        public double GetCurrentSpeed() => BaseSpeed;
+        public double GetCurrentSpeed() => _levelSpeed;
 
-        public double GetSpawnInterval() => _spawnIntervalMultiplier;
+        public double GetSpawnInterval() => _levelInterval;
 
         public void SpawnRandomCar()
         {
@@ -172,6 +182,5 @@ namespace DrivingCar
             ActiveCars.Clear();
         }
 
-        public int GetCurrentDifficultyTier() => _currentDifficultyTier;
     }
 }
