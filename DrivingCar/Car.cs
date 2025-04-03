@@ -64,10 +64,10 @@ namespace DrivingCar
             _gameCanvas.Children.Add(_carImage);
 
             // Start Moving Animation
-            StartAnimation();
+            //StartAnimation();
         }
 
-        protected virtual void StartAnimation()
+        public virtual void StartAnimation(Action<Car> cleanupCallback, double _speed)
         {
             if (_gameCanvas == null || _carImage == null)
                 return;
@@ -80,7 +80,7 @@ namespace DrivingCar
             {
                 From = 0,
                 To = beyondCanvas,
-                Duration = new Duration(TimeSpan.FromSeconds(Speed)),
+                Duration = new Duration(TimeSpan.FromSeconds(_speed)),
                 AutoReverse = false,
                 RepeatBehavior = new RepeatBehavior(1)
             };
@@ -94,6 +94,7 @@ namespace DrivingCar
             // Remove the car when animation completes
             _storyboard.Completed += (s, e) =>
             {
+                cleanupCallback?.Invoke(this);
                 _gameCanvas.Children.Remove(_carImage);
                 _carImage = null; // Prevent memory leaks
             };

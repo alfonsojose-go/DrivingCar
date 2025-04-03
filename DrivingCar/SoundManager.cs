@@ -16,6 +16,7 @@ namespace DrivingCar
             enginePlayer = new MediaPlayer();
             sirenPlayer = new MediaPlayer();
             crashPlayer = new MediaPlayer();
+            levelUpPlayer = new MediaPlayer();
 
             // Set crash sound source once
             crashPlayer.Source = MediaSource.CreateFromUri(new Uri("ms-appx:///Assets/explosion.wav"));

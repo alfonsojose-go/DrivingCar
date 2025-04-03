@@ -12,7 +12,8 @@ namespace DrivingCar
     {
         private const double SpeedMultiplier = 0.5; // ✅ 2x Faster
         private new Canvas _gameCanvas;
-        private Polygon _warningTriangle; // 🚨 Red triangle indicator
+        
+
 
         public SpeedCar(string imagePath, int xPos, int yPos, double speed = DefaultSpeed * SpeedMultiplier,
                         int carWidth = DefaultWidth, int carHeight = DefaultHeight)
@@ -27,41 +28,19 @@ namespace DrivingCar
             // Set initial YPos to the bottom of the canvas
             YPos = (int)(_gameCanvas.ActualHeight - CarHeight); // Starting at the bottom
 
-            // Add Red Triangle Warning at yPos
-            AddWarningTriangle();
 
             // Add SpeedCar Image
             base.AddMovingImage(_gameCanvas);
 
-            // Start Moving Animation
-            StartAnimation();
-        }
-
-        private void AddWarningTriangle()
-        {
-            // Align triangle with the center of the SpeedCar's X position
-            double triangleX = XPos + (CarWidth / 2);  // Center of the SpeedCar (XPos + half width)
-
-            _warningTriangle = new Polygon
-            {
-                Fill = new SolidColorBrush(Windows.UI.Colors.Red), // 🚨 Red Triangle
-                Points = new PointCollection
-                {
-                    new Windows.Foundation.Point(triangleX - 10, YPos - 300), // Left of triangle (10 pixels left of center)
-                    new Windows.Foundation.Point(triangleX + 10, YPos - 300), // Right of triangle (10 pixels right of center)
-                    new Windows.Foundation.Point(triangleX, YPos - 310) // Tip of the triangle
-                }
-            };
-
-            _gameCanvas.Children.Add(_warningTriangle);
-
             
         }
 
+        
 
 
 
-        protected override void StartAnimation()
+
+        public override void StartAnimation(Action<Car> cleanupCallback, double _speed)
         {
             if (_gameCanvas == null || _carImage == null)
                 return;
@@ -76,7 +55,7 @@ namespace DrivingCar
             {
                 From = YPos,  // Starts from the bottom
                 To = targetY, // Moves to the top
-                Duration = new Duration(TimeSpan.FromSeconds(Speed)),
+                Duration = new Duration(TimeSpan.FromSeconds(_speed * SpeedMultiplier)),
                 AutoReverse = false,
                 RepeatBehavior = new RepeatBehavior(1)
             };
@@ -90,10 +69,10 @@ namespace DrivingCar
             // Remove SpeedCar and Warning Triangle when animation completes
             _storyboard.Completed += (s, e) =>
             {
+                cleanupCallback?.Invoke(this);
                 _gameCanvas.Children.Remove(_carImage);
-                _gameCanvas.Children.Remove(_warningTriangle); // 🚨 Remove Warning
+
                 _carImage = null;
-                _warningTriangle = null;
             };
 
             // Start Animation on UI Thread

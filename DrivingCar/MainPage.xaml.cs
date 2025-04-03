@@ -28,7 +28,7 @@ namespace DrivingCar
         private Player player;
         private DispatcherTimer gameTimer;
         private DispatcherTimer spawnTimer;
-        private List<Car> obstacles;
+        private Obstacle obstacleManager;
         private Random random;
         private ApplicationView scoreboardView;
         private const string ScoreFile = "scores.json";
@@ -39,106 +39,30 @@ namespace DrivingCar
         {
             this.InitializeComponent();
             scores = new List<int>();
-            obstacles = new List<Car>();
             random = new Random();
             LoadScores();
-            
+
             player = new Player(PlayerCar);
+            soundManager = new SoundManager();
+            obstacleManager = new Obstacle(GameCanvas, soundManager); // Initialize obstacle manager
+
             gameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
             gameTimer.Tick += GameLoop;
 
             spawnTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
             spawnTimer.Tick += SpawnObstacleTimed;
 
-            soundManager = new SoundManager(); // Initialize Sound Manager
-
-            // Hide crash score initially
             lblCrashScore.Visibility = Visibility.Collapsed;
         }
 
         private void SpawnObstacleTimed(object sender, object e)
         {
-            // Only spawn obstacles if the game is running
             if (gameRunning)
             {
-                SpawnObstacles();
+                obstacleManager.SpawnRandomCar();
+                spawnTimer.Interval = TimeSpan.FromSeconds(obstacleManager.GetSpawnInterval());
             }
         }
-
-
-        private void SpawnObstacles()
-        {
-            int obstacleType = random.Next(1, 5); // Random number between 1 and 4
-            Car obstacle = null;
-
-            switch (obstacleType)
-            {
-                case 1:
-                    obstacle = new Car("Assets/carObstacle1.png", random.Next(45, 300), 0);
-                    break;
-                case 2:
-                    obstacle = new PoliceCar("Assets/carPolice.png", random.Next(45, 300), 0);
-                    soundManager.PlaySirenSound(); // Play siren when police car appears
-                    break;
-                case 3:
-                    obstacle = new SpeedCar("Assets/speedCar.png", random.Next(45, 300), 380);
-                    break;
-                case 4:
-                    obstacle = new Car("Assets/carObstacle2.png", random.Next(45, 300), 0);
-                    break;
-            }
-
-            if (obstacle != null)
-            {
-                obstacles.Add(obstacle);
-                obstacle.AddMovingImage(GameCanvas);
-
-                // Ensure the obstacle starts at the top of the screen
-                Canvas.SetTop(obstacle._carImage, 0);
-
-                // Get the height of the canvas and the height of the car image
-                double canvasHeight = GameCanvas.ActualHeight;
-                double carHeight = obstacle._carImage.ActualHeight;
-
-                // Set the animation's 'To' value so it moves the car all the way to the bottom
-                double targetPosition = canvasHeight - carHeight;
-
-                // Create an animation to move the obstacle down
-                DoubleAnimation animation = new DoubleAnimation
-                {
-                    From = 0,          // Start at the top of the canvas
-                    To = targetPosition, // Move to the bottom (adjusted for car's height)
-                    Duration = TimeSpan.FromSeconds(3), // Adjust speed
-                    FillBehavior = FillBehavior.Stop // Stops after completion
-                };
-
-                // Apply animation to Canvas.Top
-                Storyboard storyboard = new Storyboard();
-                storyboard.Children.Add(animation);
-                Storyboard.SetTarget(animation, obstacle._carImage);
-                Storyboard.SetTargetProperty(animation, "(Canvas.Top)");
-
-                // Remove obstacle when animation is complete
-                storyboard.Completed += (s, e) =>
-                {
-                    // Remove from the canvas and from the obstacles list
-                    GameCanvas.Children.Remove(obstacle._carImage);
-                    obstacles.Remove(obstacle);
-
-                    // Stop siren sound when the police car disappears (after animation completes)
-                    if (obstacle is PoliceCar)
-                    {
-                        soundManager.StopSirenSound();
-                    }
-                };
-
-                // Start the animation
-                storyboard.Begin();
-            }
-        }
-
-
-
 
 
 
@@ -147,35 +71,25 @@ namespace DrivingCar
         {
             if (!gameRunning) return;
 
-
-            // Check for collisions before spawning new obstacles
-            bool crashDetected = false;
-
-            // Check for collisions with all obstacles
-            foreach (var obstacle in obstacles)
-            {
-                if (player.CheckCrash(obstacle)) // Check for a collision with the player
-                {
-                    crashDetected = true; // If a crash is detected, stop spawning and handle the crash
-                    if (obstacle is PoliceCar)
-                    {
-                        // Stop siren sound if PoliceCar is hit
-                        soundManager.StopSirenSound();
-                    }
-                    break;
-                }
-            }
-
-            if (crashDetected)
-            {
-                soundManager.PlayCrashSound(); // Play crash sound on collision
-                GameOver(); // Handle end game logic if a crash occurred
-                return; // Stop further processing, no need to spawn new obstacles
-            }
-
-            // Update the score
+            // Update score and difficulty
             currentScore++;
             lblScore.Text = currentScore.ToString();
+            obstacleManager.UpdateDifficulty(currentScore);
+
+            // Check for collisions
+            foreach (var obstacle in obstacleManager.ActiveCars)
+            {
+                if (player.CheckCrash(obstacle))
+                {
+                    if (obstacle is PoliceCar)
+                    {
+                        soundManager.StopSirenSound();
+                    }
+                    soundManager.PlayCrashSound();
+                    GameOver();
+                    return;
+                }
+            }
         }
 
 
@@ -185,16 +99,14 @@ namespace DrivingCar
         {
             player.tiltLeft();
             player.MoveLeft();
-            //await Task.Delay(100); // Small delay to simulate key press effect
-            //player.resetTilt();
+            
         }
 
         private void btnRight_Click(object sender, RoutedEventArgs e)
         {
             player.tiltRight();
             player.MoveRight();
-            //await Task.Delay(100); // Small delay to simulate key press effect
-            //player.resetTilt();
+            
         }
 
 
@@ -217,37 +129,26 @@ namespace DrivingCar
             gameRunning = false;
             gameTimer.Stop();
             spawnTimer.Stop();
-            btnStart.Content = "Play Again?"; // Change button text to prompt user to play again
+
+            btnStart.Content = "Play Again?";
             lblCrashScore.Text = $"Score: {currentScore}";
             lblCrashScore.Visibility = Visibility.Visible;
 
-            soundManager.StopEngineSound(); // Stop engine sound when game ends
+            soundManager.StopEngineSound();
+            obstacleManager.ClearAllCars(); // Clear all obstacles
 
-            // Add new score and save it
             if (currentScore > 0)
             {
                 scores.Add(currentScore);
                 SaveScores();
             }
 
-            // Clear obstacles
-            foreach (var obstacle in obstacles)
-            {
-                GameCanvas.Children.Remove(obstacle._carImage);
-            }
-
-            obstacles.Clear();
-
-            // Reset player position
             currentScore = 0;
             lblScore.Text = "0";
             Canvas.SetLeft(PlayerCar, CarStartLeft);
             Canvas.SetTop(PlayerCar, CarStartTop);
             player.resetTilt();
-
-            // Re-enable scoreboard button
             btnScoreboard.IsEnabled = true;
-
             btnStart.IsEnabled = true;
         }
 
@@ -260,17 +161,14 @@ namespace DrivingCar
             lblCrashScore.Visibility = Visibility.Collapsed;
             currentScore = 0;
             lblScore.Text = "0";
-            obstacles.Clear(); // Clear any previous obstacles before starting
 
-            soundManager.PlayEngineSound(); // Start engine sound when game starts
+            obstacleManager.ClearAllCars(); // Clear previous obstacles
+            soundManager.PlayEngineSound();
 
-            // Start the main game loop timer
             gameTimer.Start();
-
-            // Start the obstacle spawning timer
             spawnTimer.Start();
+            spawnTimer.Interval = TimeSpan.FromSeconds(obstacleManager.GetSpawnInterval());
 
-            // Disable scoreboard button during gameplay
             btnScoreboard.IsEnabled = false;
         }
 
@@ -384,12 +282,10 @@ namespace DrivingCar
                     btnRight_Click(null, null);
                     break;
                 case VirtualKey.Up:
-                    player.resetTilt();
-                    player.MoveUp();
+                    btnUp_Click(null, null);
                     break;
                 case VirtualKey.Down:
-                    player.resetTilt();
-                    player.MoveDown();
+                    btnDown_Click(null, null);
                     break;
                 case VirtualKey.A:
                     btnLeft_Click(null, null);
@@ -398,12 +294,10 @@ namespace DrivingCar
                     btnRight_Click(null, null);
                     break;
                 case VirtualKey.W:
-                    player.resetTilt();
-                    player.MoveUp();
+                    btnUp_Click(null, null);
                     break;
                 case VirtualKey.S:
-                    player.resetTilt();
-                    player.MoveDown();
+                    btnDown_Click(null, null);
                     break;
                 case VirtualKey.Enter:
                     btnStart_Click(null, null);
