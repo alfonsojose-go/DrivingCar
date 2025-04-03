@@ -22,9 +22,8 @@
                         <Run Text="{Binding Rank}"/>
                         <Run Text=". "/>
                         <Run Text="{Binding Value}"/>
-                        <Run Text=" ("/>
+                        <Run Text=" | "/>
                         <Run Text="{Binding Time}"/>
-                        <Run Text=")"/>
                     </TextBlock>
                 </DataTemplate>
             </ListView.ItemTemplate>

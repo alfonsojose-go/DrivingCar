@@ -186,7 +186,7 @@ namespace DrivingCar
                 var file = await storageFolder.CreateFileAsync(ScoreFile, CreationCollisionOption.ReplaceExisting);
 
                 var jsonArray = new JsonArray();
-                foreach (var score in scores.OrderByDescending(s => s).Take(5))
+                foreach (var score in scores.OrderByDescending(s => s).Take(10))
                 {
                     var jsonObject = new JsonObject();
                     jsonObject.SetNamedValue("PlayerName", JsonValue.CreateStringValue("Player"));
@@ -259,12 +259,12 @@ namespace DrivingCar
         {
             lstScores.Items.Clear();
             
-            var topScores = scoreInfos.OrderByDescending(s => s.Score).Take(5);
+            var topScores = scoreInfos.OrderByDescending(s => s.Score).Take(3);
             int rank = 1;
             
             foreach (var score in topScores)
             {
-                lstScores.Items.Add($"{rank}. {score.Score} ({score.Time})");
+                lstScores.Items.Add($"{rank}. {score.Score} | {score.Time}");
                 rank++;
             }
 
