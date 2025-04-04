@@ -35,10 +35,6 @@ namespace DrivingCar
             
         }
 
-        
-
-
-
 
         public override void StartAnimation(Action<Car> cleanupCallback, double _speed)
         {

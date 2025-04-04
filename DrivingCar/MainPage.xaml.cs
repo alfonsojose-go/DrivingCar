@@ -1,3 +1,4 @@
+// Import necessary namespaces
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,7 @@ namespace DrivingCar
 {
     public sealed partial class MainPage : Page
     {
+        // Game variables and constants
         private int currentScore;
         private List<int> scores;
         private const double CarStartLeft = 171;
@@ -35,58 +37,62 @@ namespace DrivingCar
 
         private SoundManager soundManager; // Sound Manager instance
 
+        // Constructor - initializes the game
         public MainPage()
         {
             this.InitializeComponent();
             scores = new List<int>();
             random = new Random();
-            LoadScores();
+            LoadScores(); // Load existing scores from file
 
-            player = new Player(PlayerCar);
-            soundManager = new SoundManager();
+            player = new Player(PlayerCar); // Create player object with UI car element
+            soundManager = new SoundManager(); // Sound setup
             obstacleManager = new Obstacle(GameCanvas, soundManager); // Initialize obstacle manager
 
+            // Setup game loop timer
             gameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
             gameTimer.Tick += GameLoop;
 
+            // Setup obstacle spawn timer
             spawnTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
             spawnTimer.Tick += SpawnObstacleTimed;
 
             lblCrashScore.Visibility = Visibility.Collapsed;
         }
 
+        // Timer tick to spawn a new obstacle
         private void SpawnObstacleTimed(object sender, object e)
         {
             if (gameRunning)
             {
-                obstacleManager.SpawnRandomCar();
-                spawnTimer.Interval = TimeSpan.FromSeconds(obstacleManager.GetSpawnInterval());
+                obstacleManager.SpawnRandomCar(); // Spawn a new car
+                spawnTimer.Interval = TimeSpan.FromSeconds(obstacleManager.GetSpawnInterval()); // Update spawn rate
             }
         }
 
 
 
-
+        // Main game loop - runs every frame
         private void GameLoop(object sender, object e)
         {
             if (!gameRunning) return;
 
-            // Update score and difficulty
-            currentScore++;
-            lblScore.Text = currentScore.ToString();
-            obstacleManager.UpdateDifficulty(currentScore);
+           
+            currentScore++;// Increment score
+            lblScore.Text = currentScore.ToString(); // Update score label
+            obstacleManager.UpdateDifficulty(currentScore); // Adjust difficulty
 
-            // Check for collisions
+            // Check for player collisions with any obstacle
             foreach (var obstacle in obstacleManager.ActiveCars)
             {
                 if (player.CheckCrash(obstacle))
                 {
                     if (obstacle is PoliceCar)
                     {
-                        soundManager.StopSirenSound();
+                        soundManager.StopSirenSound(); // Stop siren if it's a police car
                     }
-                    soundManager.PlayCrashSound();
-                    GameOver();
+                    soundManager.PlayCrashSound(); // Play crash sound
+                    GameOver(); // End Game
                     return;
                 }
             }
@@ -94,7 +100,7 @@ namespace DrivingCar
 
 
 
-
+        // Player movement button handlers
         private void btnLeft_Click(object sender, RoutedEventArgs e)
         {
             player.tiltLeft();
@@ -124,6 +130,7 @@ namespace DrivingCar
         }
 
 
+        // Handle game over logic
         private void GameOver()
         {
             gameRunning = false;
@@ -134,15 +141,17 @@ namespace DrivingCar
             lblCrashScore.Text = $"Score: {currentScore}";
             lblCrashScore.Visibility = Visibility.Visible;
 
-            soundManager.StopEngineSound();
+            soundManager.StopEngineSound(); // Stop car engine sound
             obstacleManager.ClearAllCars(); // Clear all obstacles
 
+            // Save score if it's non-zero
             if (currentScore > 0)
             {
                 scores.Add(currentScore);
                 SaveScores();
             }
 
+            // Save score if it's non-zero
             currentScore = 0;
             lblScore.Text = "0";
             Canvas.SetLeft(PlayerCar, CarStartLeft);
@@ -152,7 +161,7 @@ namespace DrivingCar
             btnStart.IsEnabled = true;
         }
 
-
+        // Start or restart the game
         private void btnStart_Click(object sender, RoutedEventArgs e)
         {
             gameRunning = true;
@@ -162,22 +171,23 @@ namespace DrivingCar
             currentScore = 0;
             lblScore.Text = "0";
 
-            obstacleManager.ClearAllCars(); // Clear previous obstacles
-            soundManager.PlayEngineSound();
+            obstacleManager.ClearAllCars(); // Reset obstacles
+            soundManager.PlayEngineSound(); // Start engine sound
 
-            gameTimer.Start();
-            spawnTimer.Start();
+            gameTimer.Start(); // Start game loop
+            spawnTimer.Start(); // Start obstacle spawning
             spawnTimer.Interval = TimeSpan.FromSeconds(obstacleManager.GetSpawnInterval());
 
             btnScoreboard.IsEnabled = false;
         }
 
-
+        // Exit the application
         private void btnExit_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Exit();
         }
 
+        // Save scores to local JSON file
         private async void SaveScores()
         {
             try
@@ -196,7 +206,7 @@ namespace DrivingCar
                 }
 
                 await FileIO.WriteTextAsync(file, jsonArray.ToString());
-                LoadScores();
+                LoadScores(); // Reload scores after saving
             }
             catch (Exception ex)
             {
@@ -206,14 +216,17 @@ namespace DrivingCar
             }
         }
 
+        // Score information container class
         private class ScoreInfo
         {
             public int Score { get; set; }
             public string Time { get; set; }
         }
 
+        // List to store detailed score info
         private List<ScoreInfo> scoreInfos = new List<ScoreInfo>();
 
+        // Load scores from file and display them
         private async void LoadScores()
         {
             try
@@ -240,6 +253,7 @@ namespace DrivingCar
             }
             catch (FileNotFoundException)
             {
+                // No existing file found, start fresh
                 scores = new List<int>();
                 scoreInfos = new List<ScoreInfo>();
             }
@@ -252,9 +266,10 @@ namespace DrivingCar
                 scoreInfos = new List<ScoreInfo>();
             }
 
-            UpdateScoreDisplay();
+            UpdateScoreDisplay(); // Update UI with scores
         }
 
+        // Display top 3 scores on the scoreboard
         private void UpdateScoreDisplay()
         {
             lstScores.Items.Clear();
@@ -271,6 +286,7 @@ namespace DrivingCar
             lstScores.Visibility = scores.Any() ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        // Handle keyboard input for movement and actions
         private void Page_KeyDown(object sender, KeyRoutedEventArgs e)
         {
             switch (e.Key)
@@ -309,6 +325,7 @@ namespace DrivingCar
             e.Handled = true;
         }
 
+        // Reset tilt when directional keys are released
         private void Page_KeyUp(object sender, KeyRoutedEventArgs e)
         {
             if (e.Key == VirtualKey.Left || e.Key == VirtualKey.Right || e.Key == VirtualKey.A || e.Key == VirtualKey.D)
@@ -319,15 +336,14 @@ namespace DrivingCar
         }
 
 
-
-
+        // Ensure the page has keyboard focus on load
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             this.Focus(FocusState.Programmatic); // Ensure the page gets keyboard focus
         }
 
 
-
+        // Open the scoreboard in a new window
         private async void btnScoreboard_Click(object sender, RoutedEventArgs e)
         {
             CoreApplicationView newView = CoreApplication.CreateNewView();
@@ -344,6 +360,8 @@ namespace DrivingCar
             bool viewShown = await ApplicationViewSwitcher.TryShowAsStandaloneAsync(newViewId);
         }
 
+
+        // Placeholder for handling score list selection changes
         private void lstScores_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 

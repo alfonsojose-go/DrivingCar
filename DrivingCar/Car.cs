@@ -1,3 +1,4 @@
+// Import required namespaces
 using System;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
@@ -7,31 +8,34 @@ using Windows.UI.Xaml.Media;
 
 namespace DrivingCar
 {
+    // Base class representing a car in the game
     public class Car
     {
         public const int DefaultWidth = 56;
         public const int DefaultHeight = 74;
         public const double DefaultSpeed = 8.0;
 
-        public int XPos { get; set; }
-        public int YPos { get; set; }
-        public double Speed { get; set; }
-        public int CarWidth { get; }
-        public int CarHeight { get; }
-        public string ImagePath { get; }
+        public int XPos { get; set; } // X position of the car on the canvas
+        public int YPos { get; set; } // Y position of the car on the canvas
+        public double Speed { get; set; } // Movement speed of the ca
+        public int CarWidth { get; } // Width of the car image
+        public int CarHeight { get; } // Height of the car image
+        public string ImagePath { get; } // Path to the car image asset
 
-        public Image _carImage;
-        public Canvas _gameCanvas;
-        public Storyboard _storyboard;
+        public Image _carImage; // The car's Image control on the UI
+        public Canvas _gameCanvas; // The game canvas where the car is rendered
+        public Storyboard _storyboard; // Optional storyboard for car animation
 
+
+        // Constructor to initialize a car with position, size, speed, and image path
         public Car(string imagePath, int xPos, int yPos, double speed = DefaultSpeed, int carWidth = DefaultWidth, int carHeight = DefaultHeight)
         {
-            ImagePath = imagePath;
-            XPos = xPos;
-            YPos = yPos;
-            Speed = speed;
-            CarWidth = carWidth;
-            CarHeight = carHeight;
+            ImagePath = imagePath; // Set image path
+            XPos = xPos; // Set starting X position
+            YPos = yPos; // Set starting Y position
+            Speed = speed; // Set movement speed
+            CarWidth = carWidth; // Set width
+            CarHeight = carHeight; // Set height
         }
 
         public virtual void AddMovingImage(Canvas gameCanvas)
